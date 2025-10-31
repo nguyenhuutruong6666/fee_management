@@ -111,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Đặt lại mật khẩu</button>
       </form>
     <?php endif; ?>
+    <a href="login.php" class="back-btn">⬅ Quay lại đăng nhập</a>
   </div>
 </body>
 </html>

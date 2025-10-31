@@ -12,6 +12,9 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 <body>
 <header class="header">
   <div class="header-left">
+    <div>
+      <img src="../public/img/logo.png" alt="logo">
+    </div>
     <h2>HỆ THỐNG QUẢN LÝ ĐOÀN PHÍ</h2>
   </div>
   <div class="header-right">

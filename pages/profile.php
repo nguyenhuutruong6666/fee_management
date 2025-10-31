@@ -37,7 +37,7 @@ if (!$user) {
   <div class="profile-card">
     <div class="profile-header">
       <div class="avatar">
-        <img src="../public/img/user.png" alt="avatar">
+        <img src="../public/img/avt.png" alt="avatar">
       </div>
       <div class="info">
         <h3><?= htmlspecialchars($user['fullName']) ?></h3>
@@ -49,15 +49,58 @@ if (!$user) {
 
     <div class="profile-body">
       <table class="table profile-table">
-        <tr><th>Tên đăng nhập:</th><td><?= htmlspecialchars($user['userName']) ?></td></tr>
-        <tr><th>Họ và tên:</th><td><?= htmlspecialchars($user['fullName']) ?></td></tr>
-        <tr><th>Email:</th><td><?= htmlspecialchars($user['email']) ?></td></tr>
-        <tr><th>Vai trò:</th><td><?= htmlspecialchars($user['role']) ?></td></tr>
-        <tr><th>Đơn vị:</th><td><?= htmlspecialchars($user['unit']) ?></td></tr>
-        <tr><th>Ngày tạo:</th><td><?= date("d/m/Y", strtotime($user['createdAt'])) ?></td></tr>
+        <tr>
+          <th>Tên đăng nhập:</th>
+          <td><?= htmlspecialchars($user['userName']) ?></td>
+        </tr>
+        <tr>
+          <th>Họ và tên:</th>
+          <td><?= htmlspecialchars($user['fullName']) ?></td>
+        </tr>
+        <tr>
+          <th>Email:</th>
+          <td><?= htmlspecialchars($user['email']) ?></td>
+        </tr>
+        <tr>
+          <th>Năm sinh:</th>
+          <td>
+            <?= isset($user['birthDate']) && $user['birthDate'] ? date("d/m/Y", strtotime($user['birthDate'])) : "Chưa cập nhật" ?>
+          </td>
+        </tr>
+        <tr>
+          <th>Giới tính:</th>
+          <td>
+            <?php
+              if (isset($user['gender'])) {
+                echo ($user['gender'] === 'M') ? 'Nam' :
+                    (($user['gender'] === 'F') ? 'Nữ' : 'Khác');
+              } else {
+                echo "Chưa cập nhật";
+              }
+            ?>
+          </td>
+        </tr>
+        <tr>
+          <th>Ngày vào Đoàn:</th>
+          <td>
+            <?= isset($user['joinDate']) && $user['joinDate'] ? date("d/m/Y", strtotime($user['joinDate'])) : "Chưa cập nhật" ?>
+          </td>
+        </tr>
+        <tr>
+          <th>Vai trò:</th>
+          <td><?= htmlspecialchars($user['role']) ?></td>
+        </tr>
+        <tr>
+          <th>Đơn vị:</th>
+          <td><?= htmlspecialchars($user['unit']) ?></td>
+        </tr>
+        <tr>
+          <th>Ngày tạo:</th>
+          <td><?= date("d/m/Y", strtotime($user['createdAt'])) ?></td>
+        </tr>
       </table>
     </div>
-
+    
     <div class="profile-footer">
       <a href="edit_user.php?id=<?= $user['userId'] ?>" class="btn-edit">✏️ Chỉnh sửa thông tin</a>
       <a href="change_password.php" class="btn-password">🔑 Đổi mật khẩu</a>

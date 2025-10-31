@@ -13,9 +13,7 @@ if (!isset($_SESSION['user'])) {
 $currentUser = $_SESSION['user'];
 $userId = isset($_GET['id']) ? intval($_GET['id']) : $currentUser['userId'];
 
-// Phân quyền: 
-// - Admin có thể sửa bất kỳ tài khoản nào
-// - Người thường chỉ sửa chính mình
+// Phân quyền: chỉ Admin được sửa người khác
 // if (!$currentUser['isAdmin'] && $currentUser['userId'] !== $userId) {
 //     echo "<div class='container'><p style='color:red;'>❌ Bạn không có quyền chỉnh sửa tài khoản này.</p></div>";
 //     include("../includes/footer.php");
@@ -31,19 +29,24 @@ if (!$result || $result->num_rows === 0) {
 }
 $user = $result->fetch_assoc();
 
-// Xử lý cập nhật khi người dùng nhấn "Lưu thay đổi"
+// Xử lý cập nhật
 $message = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fullName = trim($_POST['fullName']);
     $email = trim($_POST['email']);
     $unit = trim($_POST['unit']);
+    $birthDate = $_POST['birthDate'] ?? null;
+    $joinDate = $_POST['joinDate'] ?? null;
+    $gender = $_POST['gender'] ?? 'O';
     $role = $currentUser['isAdmin'] ? trim($_POST['role']) : $user['role'];
 
     if (empty($fullName) || empty($email) || empty($unit)) {
         $message = "<p class='error'>⚠️ Vui lòng nhập đầy đủ thông tin.</p>";
     } else {
-        $stmt = $conn->prepare("UPDATE users SET fullName=?, email=?, unit=?, role=? WHERE userId=?");
-        $stmt->bind_param("ssssi", $fullName, $email, $unit, $role, $userId);
+        $stmt = $conn->prepare("UPDATE users 
+            SET fullName=?, email=?, unit=?, birthDate=?, joinDate=?, gender=?, role=? 
+            WHERE userId=?");
+        $stmt->bind_param("sssssssi", $fullName, $email, $unit, $birthDate, $joinDate, $gender, $role, $userId);
         if ($stmt->execute()) {
             $message = "<p class='success'>✅ Cập nhật thành công!</p>";
 
@@ -64,7 +67,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <div class="container">
   <h2>✏️ Chỉnh sửa thông tin tài khoản</h2>
-
   <?= $message ?>
 
   <form method="POST" class="form-edit">
@@ -84,6 +86,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
 
     <div class="form-group">
+      <label>Năm sinh:</label>
+      <input type="date" name="birthDate" value="<?= htmlspecialchars($user['birthDate'] ?? '') ?>">
+    </div>
+
+    <div class="form-group">
+      <label>Giới tính:</label>
+      <select name="gender">
+        <option value="M" <?= ($user['gender'] == 'M') ? 'selected' : '' ?>>Nam</option>
+        <option value="F" <?= ($user['gender'] == 'F') ? 'selected' : '' ?>>Nữ</option>
+        <option value="O" <?= ($user['gender'] == 'O') ? 'selected' : '' ?>>Khác</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Ngày vào Đoàn:</label>
+      <input type="date" name="joinDate" value="<?= htmlspecialchars($user['joinDate'] ?? '') ?>">
+    </div>
+
+    <div class="form-group">
       <label>Đơn vị:</label>
       <input type="text" name="unit" value="<?= htmlspecialchars($user['unit']) ?>" required>
     </div>
@@ -92,11 +113,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <div class="form-group">
         <label>Vai trò:</label>
         <select name="role" required>
-          <option value="Quản trị viên" <?= $user['role'] == 'Quản trị viên' ? 'selected' : '' ?>>Quản trị viên</option>
-          <option value="BCH Trường" <?= $user['role'] == 'BCH Trường' ? 'selected' : '' ?>>BCH Trường</option>
-          <option value="BCH Khoa" <?= $user['role'] == 'BCH Khoa' ? 'selected' : '' ?>>BCH Khoa</option>
-          <option value="BCH Chi đoàn" <?= $user['role'] == 'BCH Chi đoàn' ? 'selected' : '' ?>>BCH Chi đoàn</option>
-          <option value="Đoàn viên" <?= $user['role'] == 'Đoàn viên' ? 'selected' : '' ?>>Đoàn viên</option>
+          <option value="Admin" <?= $user['role'] == 'Admin' ? 'selected' : '' ?>>Quản trị viên</option>
+          <option value="BCH_Truong" <?= $user['role'] == 'BCH_Truong' ? 'selected' : '' ?>>BCH Trường</option>
+          <option value="BCH_Khoa" <?= $user['role'] == 'BCH_Khoa' ? 'selected' : '' ?>>BCH Khoa</option>
+          <option value="BCH_ChiDoan" <?= $user['role'] == 'BCH_ChiDoan' ? 'selected' : '' ?>>BCH Chi đoàn</option>
+          <option value="DoanVien" <?= $user['role'] == 'DoanVien' ? 'selected' : '' ?>>Đoàn viên</option>
         </select>
       </div>
     <?php else: ?>
@@ -112,5 +133,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
   </form>
 </div>
-
+<style>
+  
+  input, select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  .btn-save {
+    background: #0984e3;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .btn-back {
+    background: #b2bec3;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 6px;
+  }
+  .error { color: #d63031; font-weight: bold; }
+  .success { color: #27ae60; font-weight: bold; }
+</style>
 <?php include("../includes/footer.php"); ?>
