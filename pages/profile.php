@@ -12,7 +12,7 @@ if (!isset($_SESSION['user'])) {
 
 $currentUser = $_SESSION['user'];
 
-// Nếu là Admin thì có thể xem toàn bộ user (hoặc lọc theo GET id)
+// Nếu là Admin thì có thể xem tài khoản người khác qua GET id
 if ($currentUser['isAdmin'] && isset($_GET['id'])) {
     $userId = intval($_GET['id']);
     $query = "SELECT * FROM users WHERE userId = $userId";
@@ -31,7 +31,6 @@ if (!$user) {
     exit();
 }
 ?>
-
 <div class="container">
   <h2>👤 Thông tin tài khoản</h2>
 
@@ -61,8 +60,67 @@ if (!$user) {
 
     <div class="profile-footer">
       <a href="edit_user.php?id=<?= $user['userId'] ?>" class="btn-edit">✏️ Chỉnh sửa thông tin</a>
+      <a href="change_password.php" class="btn-password">🔑 Đổi mật khẩu</a>
     </div>
   </div>
 </div>
+
+<style>
+.profile-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 20px;
+  max-width: 700px;
+  margin: 30px auto;
+}
+.profile-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+.profile-header .avatar img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  margin-right: 20px;
+}
+.profile-header .info h3 {
+  margin: 0;
+  color: #2d3436;
+}
+.profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+.profile-table th {
+  text-align: left;
+  width: 30%;
+  color: #555;
+  padding: 8px;
+}
+.profile-table td {
+  color: #2d3436;
+  padding: 8px;
+}
+.profile-footer {
+  text-align: right;
+  margin-top: 15px;
+}
+.btn-edit, .btn-password {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-left: 8px;
+  font-size: 15px;
+}
+.btn-edit { background: #0984e3; color: white; }
+.btn-edit:hover { background: #74b9ff; }
+.btn-password { background: #00b894; color: white; }
+.btn-password:hover { background: #55efc4; }
+</style>
 
 <?php include("../includes/footer.php"); ?>

@@ -214,7 +214,7 @@ body {
 /* ===== CONTAINER ===== */
 .container {
   margin-left: 240px; /* chừa chỗ cho sidebar */
-  margin-top: 90px;   /* chừa chỗ cho header */
+  margin-top: 5px;   /* chừa chỗ cho header */
   max-width: calc(100% - 260px);
 }
 .container {
