@@ -84,3 +84,208 @@ body {
 .btn:hover {
   background: #0056b3;
 }
+/* ===== SIDEBAR NAVIGATION ===== */
+.sidebar {
+  position: fixed;
+  top: 70px; /* chiều cao header */
+  left: 0;
+  width: 220px;
+  height: calc(100vh - 70px);
+  background-color: #004080;
+  color: white;
+  padding-top: 10px;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+}
+
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar ul li {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar ul li a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 14px 18px;
+  transition: 0.3s;
+}
+
+.sidebar ul li a:hover {
+  background-color: #0056b3;
+  padding-left: 25px;
+}
+
+/* Khi body có sidebar thì nội dung đẩy sang phải */
+.container {
+  margin-left: 240px;
+  max-width: calc(100% - 260px);
+}
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  z-index: 100;
+}
+body {
+  margin: 0;
+  padding-top: 70px; /* để tránh header đè nội dung */
+}
+/* ===== HEADER ===== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: linear-gradient(90deg, #0056b3, #007bff);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 25px;
+  z-index: 1000; /* đảm bảo header nằm trên sidebar */
+}
+
+.header-left h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-logout {
+  background: #ff5252;
+  color: white;
+  padding: 6px 10px;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed;
+  top: 70px; /* 🔹 để nằm ngay dưới header */
+  left: 0;
+  width: 220px;
+  height: calc(100vh - 70px); /* 🔹 chiếm hết phần còn lại của màn hình */
+  background-color: #004080;
+  color: white;
+  padding-top: 10px;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  z-index: 900; /* dưới header */
+}
+
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar ul li {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar ul li a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 14px 18px;
+  transition: 0.3s;
+}
+
+.sidebar ul li a:hover {
+  background-color: #0056b3;
+  padding-left: 25px;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  margin-left: 240px; /* chừa chỗ cho sidebar */
+  margin-top: 90px;   /* chừa chỗ cho header */
+  max-width: calc(100% - 260px);
+}
+.container {
+  padding: 20px;
+  margin-left: 220px; /* tránh đè navbar dọc */
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table th, .table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.table th {
+  background: #4a69bd;
+  color: white;
+}
+
+.table tr:hover {
+  background: #f4f6f9;
+}
+
+.btn-add {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #38ada9;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+.btn-add:hover {
+  background: #079992;
+}
+
+.btn-edit, .btn-delete {
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: white;
+  margin-right: 5px;
+}
+
+.btn-edit {
+  background: #60a3bc;
+}
+
+.btn-delete {
+  background: #e55039;
+}
+
+.btn-edit:hover {
+  background: #3c6382;
+}
+
+.btn-delete:hover {
+  background: #b71540;
+}

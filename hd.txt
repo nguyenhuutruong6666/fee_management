@@ -1,21 +1,16 @@
-fee_management/
+C:\xampp\htdocs\fee_management\
 │
 ├── config/
 │   └── db.php
 │
 ├── includes/
 │   ├── header.php
+│   ├── navbar.php
 │   ├── footer.php
-│   └── navbar.php
-│
-├── public/
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── main.js
 │
 ├── pages/
 │   ├── login.php
+│   ├── logout.php
 │   ├── dashboard.php
 │   ├── users.php
 │   ├── fee_policy.php
@@ -23,6 +18,17 @@ fee_management/
 │   ├── payments.php
 │   ├── activities.php
 │   ├── reports.php
-│   └── logout.php
+│   ├── forgot_password.php
+│   ├── change_password.php
+│   ├── units.php
+│   ├── proposals.php
+│   ├── approval.php
+│   ├── settlement.php
+│   ├── reminders.php
+│   └── settings.php
+│
+├── public/
+│   ├── css/style.css
+│   └── js/main.js
 │
 └── index.php

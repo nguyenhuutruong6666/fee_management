@@ -2,7 +2,7 @@
 $host = 'localhost';
 $user = 'root';
 $pass = '';
-$db   = 'fee_management';
+$db   = 'db_fee_management';
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
