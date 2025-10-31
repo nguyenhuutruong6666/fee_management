@@ -1,0 +1,86 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f4f6fa;
+}
+
+.header {
+  background: linear-gradient(90deg, #0056b3, #007bff);
+  color: white;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-logout {
+  background: #ff5252;
+  color: white;
+  padding: 6px 10px;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.navbar {
+  background: #004080;
+  display: flex;
+  justify-content: center;
+}
+.navbar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+.navbar li a {
+  color: white;
+  text-decoration: none;
+  padding: 14px 18px;
+  display: block;
+}
+.navbar li a:hover {
+  background-color: #003366;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 30px auto;
+  background: white;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.footer {
+  text-align: center;
+  padding: 15px;
+  background: #eee;
+  color: #333;
+  font-size: 14px;
+  margin-top: 40px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table th, .table td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+.table th {
+  background: #007bff;
+  color: white;
+}
+.btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn:hover {
+  background: #0056b3;
+}

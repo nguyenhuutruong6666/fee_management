@@ -1,0 +1,28 @@
+fee_management/
+│
+├── config/
+│   └── db.php
+│
+├── includes/
+│   ├── header.php
+│   ├── footer.php
+│   └── navbar.php
+│
+├── public/
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── main.js
+│
+├── pages/
+│   ├── login.php
+│   ├── dashboard.php
+│   ├── users.php
+│   ├── fee_policy.php
+│   ├── obligations.php
+│   ├── payments.php
+│   ├── activities.php
+│   ├── reports.php
+│   └── logout.php
+│
+└── index.php
