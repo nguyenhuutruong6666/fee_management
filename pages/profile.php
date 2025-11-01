@@ -90,6 +90,10 @@ if (!$user) {
 </div>
 
 <style>
+.container {
+  margin-left: 240px;
+  max-width: calc(100% - 300px);
+}
 .profile-card {
   background: #fff;
   border-radius: 12px;

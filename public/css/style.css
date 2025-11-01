@@ -121,11 +121,7 @@ body {
   padding-left: 25px;
 }
 
-/* Khi body có sidebar thì nội dung đẩy sang phải */
-.container {
-  margin-left: 240px;
-  max-width: calc(100% - 260px);
-}
+
 .header {
   position: fixed;
   top: 0;
@@ -226,16 +222,6 @@ body {
   padding-left: 25px;
 }
 
-/* ===== CONTAINER ===== */
-.container {
-  margin-left: 240px; /* chừa chỗ cho sidebar */
-  margin-top: 5px;   /* chừa chỗ cho header */
-  max-width: calc(100% - 260px);
-}
-.container {
-  padding: 20px;
-  margin-left: 220px; /* tránh đè navbar dọc */
-}
 
 h2 {
   color: #333;

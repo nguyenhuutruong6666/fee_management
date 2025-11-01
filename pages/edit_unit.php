@@ -60,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 
 <style>
-.container { padding:20px; max-width:600px; margin:auto; }
+.container { padding:20px; max-width:600px; margin:auto; margin-top: 2%;}
 form { background:white; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
 .form-group { margin-bottom:12px; }
 input { width:100%; padding:8px; border:1px solid #ccc; border-radius:5px; }

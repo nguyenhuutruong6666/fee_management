@@ -87,6 +87,11 @@ $result = $conn->query($sql);
 <style>
 .container {
   padding: 20px;
+  margin-right: 1%;
+}
+.container {
+  margin-left: 240px;
+  max-width: calc(100% - 300px);
 }
 h2 {
   text-align: center;

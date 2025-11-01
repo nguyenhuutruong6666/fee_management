@@ -60,6 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <style>
+.container {
+  margin-left: 240px;
+  max-width: calc(100% - 300px);
+}
 .password-box {
   background: #fff;
   padding: 25px;

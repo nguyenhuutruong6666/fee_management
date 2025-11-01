@@ -80,10 +80,19 @@ function renderTree($conn, $parent_id = NULL, $level = 0) {
 .container {
   padding: 20px;
   max-width: 1000px;
-  margin: auto;
+  margin: 100 auto 100;
   background: #f8f9fa;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+/* ===== CONTAINER ===== */
+.container {
+  margin-left: 240px; /* chừa chỗ cho sidebar */
+  margin-top: 5px;   /* chừa chỗ cho header */
+  max-width: calc(100% - 300px);
+}
+.container {
+  padding: 20px;
 }
 
 h2 {

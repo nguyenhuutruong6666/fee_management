@@ -186,6 +186,10 @@ $units = $conn->query("SELECT id, unit_name, unit_level FROM organization_units 
 </div>
 
 <style>
+.container {
+  margin-left: 240px;
+  max-width: calc(100% - 300px);
+}
 input, select {
   width: 100%;
   padding: 8px;

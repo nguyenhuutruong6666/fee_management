@@ -156,7 +156,7 @@ if (isset($_POST['import_confirm'])) {
 </div>
 
 <style>
-.container { padding: 20px; }
+.container { padding: 20px; margin-right: 1%; margin-left: 18%;}
 .form-import { margin-bottom: 20px; }
 .form-actions { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
 input[type="file"] { border: 1px solid #ccc; padding: 8px; border-radius: 6px; }
