@@ -97,7 +97,6 @@ h2 {
 /* --- Action buttons --- */
 .actions {
   display: flex;
-  justify-content: flex-end;
   gap: 10px;
   margin-bottom: 15px;
   flex-wrap: wrap;
@@ -111,6 +110,7 @@ h2 {
   font-weight: 500;
   transition: 0.2s;
 }
+
 
 .btn-add { background: #28a745; }
 .btn-add:hover { background: #218838; }

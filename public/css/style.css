@@ -266,15 +266,7 @@ h2 {
   background: #f4f6f9;
 }
 
-.btn-add {
-  display: inline-block;
-  padding: 8px 14px;
-  background: #38ada9;
-  color: white;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: 0.3s;
-}
+
 
 .btn-add:hover {
   background: #079992;
