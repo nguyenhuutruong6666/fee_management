@@ -1,21 +1,48 @@
-<?php
+<?php 
 session_start();
 include("../config/db.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usernameOrEmail = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
+    $error = '';
 
-    // ✅ Cho phép đăng nhập bằng username hoặc email
-    $sql = "SELECT * FROM users WHERE userName='$usernameOrEmail' OR email='$usernameOrEmail' LIMIT 1";
-    $result = $conn->query($sql);
+    // ✅ Chuẩn bị câu truy vấn lấy thông tin user + vai trò
+    $sql = "
+        SELECT 
+            u.*, 
+            r.role_name
+        FROM users u
+        LEFT JOIN user_role ur ON u.userId = ur.user_id
+        LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.userName = ? OR u.email = ?
+        LIMIT 1
+    ";
 
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $usernameOrEmail, $usernameOrEmail);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // ✅ Nếu tồn tại user
     if ($result && $result->num_rows > 0) {
         $user = $result->fetch_assoc();
 
-        // ✅ So sánh mật khẩu thường (có thể đổi sang password_verify sau)
+        // ⚠️ So sánh mật khẩu (plain text – có thể nâng cấp thành password_verify)
         if ($password === $user['password']) {
-            $_SESSION['user'] = $user;
+            
+            // ✅ Lưu thông tin session đầy đủ
+            $_SESSION['user'] = [
+                'userId' => $user['userId'],
+                'userName' => $user['userName'],
+                'fullName' => $user['fullName'],
+                'email' => $user['email'],
+                'isAdmin' => $user['isAdmin'],
+                'role_name' => $user['role_name'] ?? '', // 🔥 Quan trọng
+                'unit' => $user['unit'] ?? null
+            ];
+
+            // ✅ Chuyển hướng sau khi đăng nhập
             header("Location: dashboard.php");
             exit();
         } else {
@@ -101,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="login-container">
     <div class="login-box">
       <h2>HỆ THỐNG QUẢN LÝ ĐOÀN PHÍ</h2>
-      <?php if(isset($error)) echo "<div class='error'>$error</div>"; ?>
+      <?php if(isset($error) && $error != '') echo "<div class='error'>$error</div>"; ?>
       <form method="POST">
         <input type="text" name="username" placeholder="Tên đăng nhập hoặc Email" required>
         <input type="password" name="password" placeholder="Mật khẩu" required>

@@ -2,9 +2,6 @@
 include("../includes/header.php");
 include("../includes/navbar.php");
 
-// ✅ KHÔNG cần gọi session_start() ở đây nữa,
-// vì header.php đã gọi rồi.
-
 if (!isset($_SESSION['user'])) {
   header("Location: login.php");
   exit();
@@ -25,6 +22,8 @@ $user = $_SESSION['user'];
 
     <?php if ($user['isAdmin']): ?>
       <a href="transactions.php" class="btn-view">📜 Xem giao dịch đoàn phí</a>
+      <a href="policy_settings.php" class="btn-policy">⚙️ Thiết lập chính sách đoàn phí</a>
+      <a href="generate_fee_obligation.php" class="btn-policy">⚙️ Sinh nghĩa vụ đoàn phí</a>
     <?php endif; ?>
   </div>
 </div>
@@ -63,6 +62,8 @@ p {
   text-decoration: none;
   transition: all 0.3s ease;
 }
+
+/* 💰 Nộp đoàn phí */
 .btn-pay {
   background: linear-gradient(135deg, #00b894, #00cec9);
   color: white;
@@ -72,6 +73,8 @@ p {
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(0, 206, 201, 0.4);
 }
+
+/* 📜 Xem giao dịch */
 .btn-view {
   background: linear-gradient(135deg, #0984e3, #74b9ff);
   color: white;
@@ -81,6 +84,18 @@ p {
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(9, 132, 227, 0.4);
 }
+
+/* ⚙️ Thiết lập chính sách đoàn phí */
+.btn-policy {
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: white;
+  box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+}
+.btn-policy:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(108, 92, 231, 0.4);
+}
+
 @media (max-width: 768px) {
   .container {
     margin-left: 0;
