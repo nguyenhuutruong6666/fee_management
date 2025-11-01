@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th10 01, 2025 lúc 11:12 AM
+-- Thời gian đã tạo: Th10 01, 2025 lúc 01:09 PM
 -- Phiên bản máy phục vụ: 10.4.11-MariaDB
 -- Phiên bản PHP: 7.4.4
 
@@ -20,6 +20,24 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `db_fee_management`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `fee_cashbook`
+--
+
+CREATE TABLE `fee_cashbook` (
+  `id` int(11) NOT NULL,
+  `payment_id` int(11) NOT NULL,
+  `transaction_type` enum('Thu','Chi') DEFAULT 'Thu',
+  `transaction_date` datetime DEFAULT current_timestamp(),
+  `amount` decimal(10,2) NOT NULL,
+  `recorded_by` int(11) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -109,6 +127,35 @@ INSERT INTO `fee_obligation` (`id`, `user_id`, `policy_id`, `period_label`, `amo
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `fee_payment`
+--
+
+CREATE TABLE `fee_payment` (
+  `id` int(11) NOT NULL,
+  `obligation_id` int(11) NOT NULL,
+  `payer_id` int(11) NOT NULL,
+  `collector_id` int(11) DEFAULT NULL,
+  `payment_method` varchar(100) NOT NULL,
+  `payment_date` datetime DEFAULT current_timestamp(),
+  `amount` decimal(10,2) NOT NULL,
+  `status` enum('Pending','Success','Failed','Need review','Canceled') DEFAULT 'Pending',
+  `receipt_id` int(11) DEFAULT NULL,
+  `transaction_code` varchar(100) DEFAULT NULL,
+  `note` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Đang đổ dữ liệu cho bảng `fee_payment`
+--
+
+INSERT INTO `fee_payment` (`id`, `obligation_id`, `payer_id`, `collector_id`, `payment_method`, `payment_date`, `amount`, `status`, `receipt_id`, `transaction_code`, `note`, `created_at`, `updated_at`) VALUES
+(1, 11, 5, NULL, 'VietQR', '2025-11-01 18:39:22', '4000.00', 'Pending', NULL, 'TXN-6905f16ad1e1d', '', '2025-11-01 18:39:22', '2025-11-01 18:58:09');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `fee_policy`
 --
 
@@ -130,7 +177,8 @@ CREATE TABLE `fee_policy` (
 --
 
 INSERT INTO `fee_policy` (`id`, `policy_name`, `cycle`, `due_day`, `due_type`, `standard_amount`, `status`, `created_by`, `created_at`, `updated_at`) VALUES
-(1, 'Chính sách đoàn phí 2025 - Kỳ I', 'Tháng', 15, 'tháng', '3000.00', 'Active', 1, '2025-11-01 16:41:35', '2025-11-01 16:41:35');
+(1, 'Chính sách đoàn phí 2025 - Kỳ I', 'Tháng', 15, 'tháng', '3000.00', 'Active', 1, '2025-11-01 16:41:35', '2025-11-01 16:41:35'),
+(2, 'test', 'Năm', 15, 'năm', '10000000.00', 'Active', 1, '2025-11-01 18:18:41', '2025-11-01 18:24:56');
 
 -- --------------------------------------------------------
 
@@ -153,7 +201,8 @@ CREATE TABLE `fee_policy_history` (
 --
 
 INSERT INTO `fee_policy_history` (`id`, `policy_id`, `applied_from`, `applied_to`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 1, '2025-01-01', NULL, 1, '2025-11-01 16:41:50', '2025-11-01 16:41:50');
+(1, 1, '2025-01-01', NULL, 1, '2025-11-01 16:41:50', '2025-11-01 16:41:50'),
+(2, 2, '2025-11-01', NULL, 0, '2025-11-01 18:18:41', '2025-11-01 18:18:41');
 
 -- --------------------------------------------------------
 
@@ -178,7 +227,29 @@ CREATE TABLE `fee_policy_rule` (
 INSERT INTO `fee_policy_rule` (`id`, `policy_id`, `role_name`, `amount`, `note`, `created_at`, `updated_at`) VALUES
 (1, 1, 'BCH Trường', '1000.00', 'Giảm 2000đ/tháng', '2025-11-01 16:42:05', '2025-11-01 16:42:05'),
 (2, 1, 'BCH Khoa', '2000.00', 'Giảm 1000đ/tháng', '2025-11-01 16:42:05', '2025-11-01 16:42:05'),
-(3, 1, 'BCH Chi đoàn', '2500.00', 'Giảm 500đ/tháng', '2025-11-01 16:42:05', '2025-11-01 16:42:05');
+(3, 1, 'BCH Chi đoàn', '2500.00', 'Giảm 500đ/tháng', '2025-11-01 16:42:05', '2025-11-01 16:42:05'),
+(4, 2, 'BCH Trường', '1333000.00', NULL, '2025-11-01 18:18:41', '2025-11-01 18:18:41'),
+(5, 2, 'BCH Khoa', '233000.00', NULL, '2025-11-01 18:18:41', '2025-11-01 18:18:41'),
+(6, 2, 'BCH Chi đoàn', '33333300.00', NULL, '2025-11-01 18:18:41', '2025-11-01 18:18:41');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `fee_receipt`
+--
+
+CREATE TABLE `fee_receipt` (
+  `id` int(11) NOT NULL,
+  `payment_id` int(11) NOT NULL,
+  `receipt_code` varchar(100) DEFAULT NULL,
+  `issue_date` datetime DEFAULT current_timestamp(),
+  `issued_by` int(11) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `file_url` varchar(255) DEFAULT NULL,
+  `status` enum('Issued','Canceled') DEFAULT 'Issued',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -297,7 +368,6 @@ INSERT INTO `users` (`userId`, `userName`, `fullName`, `gender`, `identifyCard`,
 (28, 'sv13', 'Pham Thi N', 'F', '100000020', 'sv13@hnue.edu.vn', '123456', '2000-03-03', '2019-05-05', '16', 0, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (29, 'sv14', 'Nguyen Van O', 'M', '100000021', 'sv14@hnue.edu.vn', '123456', '2001-04-04', '2020-04-04', '19', 0, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (30, 'lecturer01', 'Giang Vien 01', 'M', '100000022', 'gv01@hnue.edu.vn', '123456', '1980-09-09', '2008-09-01', '8', 0, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
-(31, 'admin2', 'Phu Hop Admin', 'M', '100000023', 'admin2@doan.org', '123456', '1975-06-06', '2000-06-06', '1', 1, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (32, 'officer1', 'Nhan Vien Phi', 'F', '100000024', 'officer1@doan.org', '123456', '1992-07-07', '2016-07-10', '13', 0, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (33, 'officer2', 'Nhan Vien 2', 'M', '100000025', 'officer2@doan.org', '123456', '1991-08-08', '2015-08-15', '15', 0, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (34, 'member21', 'Thanh Vien 21', 'F', '100000026', 'member21@hnue.edu.vn', '123456', '2002-09-09', '2021-09-09', '12', 0, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
@@ -355,7 +425,6 @@ INSERT INTO `user_role` (`id`, `user_id`, `role_id`, `createdAt`, `updatedAt`) V
 (28, 28, 5, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (29, 29, 5, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (30, 30, 5, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
-(31, 31, 1, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (32, 32, 4, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (33, 33, 4, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
 (34, 34, 5, '2025-11-01 16:21:09', '2025-11-01 16:21:09'),
@@ -372,6 +441,14 @@ INSERT INTO `user_role` (`id`, `user_id`, `role_id`, `createdAt`, `updatedAt`) V
 --
 
 --
+-- Chỉ mục cho bảng `fee_cashbook`
+--
+ALTER TABLE `fee_cashbook`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_cashbook_payment` (`payment_id`),
+  ADD KEY `fk_cashbook_user` (`recorded_by`);
+
+--
 -- Chỉ mục cho bảng `fee_generation_log`
 --
 ALTER TABLE `fee_generation_log`
@@ -386,6 +463,16 @@ ALTER TABLE `fee_obligation`
   ADD UNIQUE KEY `reference_code` (`reference_code`),
   ADD KEY `fk_obligation_user` (`user_id`),
   ADD KEY `fk_obligation_policy` (`policy_id`);
+
+--
+-- Chỉ mục cho bảng `fee_payment`
+--
+ALTER TABLE `fee_payment`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `transaction_code` (`transaction_code`),
+  ADD KEY `fk_payment_obligation` (`obligation_id`),
+  ADD KEY `fk_payment_payer` (`payer_id`),
+  ADD KEY `fk_payment_collector` (`collector_id`);
 
 --
 -- Chỉ mục cho bảng `fee_policy`
@@ -407,6 +494,15 @@ ALTER TABLE `fee_policy_history`
 ALTER TABLE `fee_policy_rule`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_rule_policy` (`policy_id`);
+
+--
+-- Chỉ mục cho bảng `fee_receipt`
+--
+ALTER TABLE `fee_receipt`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `receipt_code` (`receipt_code`),
+  ADD KEY `fk_receipt_payment` (`payment_id`),
+  ADD KEY `fk_receipt_user` (`issued_by`);
 
 --
 -- Chỉ mục cho bảng `organization_units`
@@ -445,6 +541,12 @@ ALTER TABLE `user_role`
 --
 
 --
+-- AUTO_INCREMENT cho bảng `fee_cashbook`
+--
+ALTER TABLE `fee_cashbook`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `fee_generation_log`
 --
 ALTER TABLE `fee_generation_log`
@@ -457,22 +559,34 @@ ALTER TABLE `fee_obligation`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
+-- AUTO_INCREMENT cho bảng `fee_payment`
+--
+ALTER TABLE `fee_payment`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT cho bảng `fee_policy`
 --
 ALTER TABLE `fee_policy`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT cho bảng `fee_policy_history`
 --
 ALTER TABLE `fee_policy_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT cho bảng `fee_policy_rule`
 --
 ALTER TABLE `fee_policy_rule`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT cho bảng `fee_receipt`
+--
+ALTER TABLE `fee_receipt`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `organization_units`
@@ -503,6 +617,13 @@ ALTER TABLE `user_role`
 --
 
 --
+-- Các ràng buộc cho bảng `fee_cashbook`
+--
+ALTER TABLE `fee_cashbook`
+  ADD CONSTRAINT `fk_cashbook_payment` FOREIGN KEY (`payment_id`) REFERENCES `fee_payment` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cashbook_user` FOREIGN KEY (`recorded_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL;
+
+--
 -- Các ràng buộc cho bảng `fee_generation_log`
 --
 ALTER TABLE `fee_generation_log`
@@ -514,6 +635,14 @@ ALTER TABLE `fee_generation_log`
 ALTER TABLE `fee_obligation`
   ADD CONSTRAINT `fk_obligation_policy` FOREIGN KEY (`policy_id`) REFERENCES `fee_policy` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_obligation_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`userId`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `fee_payment`
+--
+ALTER TABLE `fee_payment`
+  ADD CONSTRAINT `fk_payment_collector` FOREIGN KEY (`collector_id`) REFERENCES `users` (`userId`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_payment_obligation` FOREIGN KEY (`obligation_id`) REFERENCES `fee_obligation` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_payment_payer` FOREIGN KEY (`payer_id`) REFERENCES `users` (`userId`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `fee_policy`
@@ -532,6 +661,13 @@ ALTER TABLE `fee_policy_history`
 --
 ALTER TABLE `fee_policy_rule`
   ADD CONSTRAINT `fk_rule_policy` FOREIGN KEY (`policy_id`) REFERENCES `fee_policy` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `fee_receipt`
+--
+ALTER TABLE `fee_receipt`
+  ADD CONSTRAINT `fk_receipt_payment` FOREIGN KEY (`payment_id`) REFERENCES `fee_payment` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_receipt_user` FOREIGN KEY (`issued_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL;
 
 --
 -- Các ràng buộc cho bảng `organization_units`

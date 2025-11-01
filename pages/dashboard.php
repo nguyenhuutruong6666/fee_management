@@ -21,7 +21,7 @@ $user = $_SESSION['user'];
     <?php endif; ?>
 
     <?php if ($user['isAdmin']): ?>
-      <a href="transactions.php" class="btn-view">📜 Xem giao dịch đoàn phí</a>
+      <a href="manage_transactions.php" class="btn-view">📜 Xem giao dịch đoàn phí</a>
       <a href="policy_settings.php" class="btn-policy">⚙️ Thiết lập chính sách đoàn phí</a>
       <a href="generate_fee_obligation.php" class="btn-policy">⚙️ Sinh nghĩa vụ đoàn phí</a>
     <?php endif; ?>

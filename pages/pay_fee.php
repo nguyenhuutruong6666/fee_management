@@ -1,6 +1,8 @@
 <?php
+session_start();
 include("../includes/header.php");
 include("../includes/navbar.php");
+include("../config/db.php");
 
 if (!isset($_SESSION['user'])) {
   header("Location: login.php");
@@ -8,159 +10,142 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
+$user_id = $user['userId'];
 $message = "";
 
-// Giả lập danh sách kỳ nộp phí (sau này lấy từ bảng fee_periods)
-$periods = [
-  ['id' => 1, 'name' => 'Học kỳ I - Năm 2025', 'amount' => 50000],
-  ['id' => 2, 'name' => 'Học kỳ II - Năm 2025', 'amount' => 50000]
-];
-
-// Nếu người dùng gửi form nộp phí
+// ✅ Xử lý form thanh toán
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $method = $_POST['method'];
-  $periodId = intval($_POST['period']);
-  $amount = intval($_POST['amount']);
+  $obligation_id = intval($_POST['obligation_id']);
+  $method = $_POST['payment_method'];
+  $amount = floatval($_POST['amount']);
+  $collector_id = isset($_POST['collector_id']) ? intval($_POST['collector_id']) : null;
+  $transaction_code = "TXN-" . uniqid();
 
-  // Giả lập xử lý thanh toán
-  if ($method === "cash") {
-    $status = "Pending";
-    $message = "<p class='success'>💵 Đã ghi nhận giao dịch tiền mặt (chờ xác nhận của BCH Chi đoàn).</p>";
-  } elseif ($method === "vietqr") {
-    $status = "Pending";
-    $message = "<p class='success'>🏦 Vui lòng chuyển khoản qua VietQR với mã tham chiếu: <b>DV{$user['userId']}K{$periodId}</b></p>";
-  } elseif ($method === "vnpay" || $method === "momo") {
-    $status = "Redirect";
-    $message = "<p class='success'>💳 Hệ thống đang chuyển hướng đến cổng thanh toán <b>".strtoupper($method)."</b>...</p>";
-    // Sau này thêm redirect sang cổng thanh toán thật
+  // Lưu giao dịch vào fee_payment
+  $stmt = $conn->prepare("
+    INSERT INTO fee_payment (obligation_id, payer_id, collector_id, payment_method, amount, transaction_code, status, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, 'Pending', NOW())
+  ");
+  $stmt->bind_param("iiisds", $obligation_id, $user_id, $collector_id, $method, $amount, $transaction_code);
+
+  if ($stmt->execute()) {
+    $message = "<p class='success'>✅ Đã ghi nhận giao dịch (Mã: $transaction_code). Đang chờ xác nhận...</p>";
+
+    // Nếu là nộp tiền mặt và người thu là BCH, cập nhật ngay
+    if ($method === 'Cash' && $user['isAdmin'] == 1) {
+      $conn->query("UPDATE fee_payment SET status='Success' WHERE transaction_code='$transaction_code'");
+      $conn->query("UPDATE fee_obligation SET status='Đã nộp' WHERE id=$obligation_id");
+
+      // Sinh biên lai điện tử
+      $conn->query("
+        INSERT INTO fee_receipt (payment_id, receipt_code, issued_by, amount)
+        SELECT id, CONCAT('RC-', id, '-', YEAR(NOW())), $user_id, amount FROM fee_payment WHERE transaction_code='$transaction_code'
+      ");
+
+      // Ghi vào sổ quỹ
+      $conn->query("
+        INSERT INTO fee_cashbook (payment_id, transaction_type, amount, recorded_by, description)
+        SELECT id, 'Thu', amount, $user_id, 'Nộp đoàn phí tiền mặt' FROM fee_payment WHERE transaction_code='$transaction_code'
+      ");
+      $message = "<p class='success'>💰 Thanh toán tiền mặt thành công! Nghĩa vụ đã được cập nhật.</p>";
+    }
+  } else {
+    $message = "<p class='error'>❌ Lỗi khi ghi nhận giao dịch. Vui lòng thử lại.</p>";
   }
-
-  // Ghi log (mô phỏng, sau này ghi DB)
-  file_put_contents("../logs/payment_log.txt",
-    "[".date("Y-m-d H:i:s")."] {$user['fullName']} - {$method} - {$periodId} - {$amount} - {$status}\n",
-    FILE_APPEND
-  );
 }
+
+// ✅ Lấy nghĩa vụ chưa nộp của người dùng
+$obligations = $conn->query("
+  SELECT o.id, o.period_label, o.amount, o.status, p.policy_name
+  FROM fee_obligation o
+  JOIN fee_policy p ON o.policy_id = p.id
+  WHERE o.user_id = $user_id AND o.status = 'Chưa nộp'
+");
 ?>
 
 <div class="container">
-  <h2>💰 Nộp đoàn phí</h2>
+  <h2>💳 Nộp đoàn phí</h2>
+  <?= $message ?>
 
-  <?php if ($message): ?>
-    <div class="alert"><?= $message ?></div>
-  <?php endif; ?>
-
-  <form method="POST" class="form-pay">
-    <div class="form-group">
-      <label>Kỳ nộp đoàn phí:</label>
-      <select name="period" required>
-        <option value="">-- Chọn kỳ học --</option>
-        <?php foreach ($periods as $p): ?>
-          <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?> (<?= number_format($p['amount']) ?>đ)</option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Số tiền nộp:</label>
-      <input type="number" name="amount" value="50000" min="1000" required>
-    </div>
-
-    <div class="form-group">
-      <label>Hình thức thanh toán:</label>
-      <div class="methods">
-        <label><input type="radio" name="method" value="cash" required> 💵 Tiền mặt</label>
-        <label><input type="radio" name="method" value="vietqr"> 🏦 Chuyển khoản VietQR</label>
-        <label><input type="radio" name="method" value="vnpay"> 💳 VNPay</label>
-        <label><input type="radio" name="method" value="momo"> 📱 MoMo</label>
+  <?php if ($obligations->num_rows > 0): ?>
+    <form method="POST" class="form-pay">
+      <div class="form-group">
+        <label>Chọn kỳ cần nộp:</label>
+        <select name="obligation_id" required>
+          <option value="">-- Chọn kỳ --</option>
+          <?php while ($o = $obligations->fetch_assoc()): ?>
+            <option value="<?= $o['id'] ?>">
+              <?= htmlspecialchars($o['policy_name']) ?> - <?= $o['period_label'] ?> (<?= number_format($o['amount'],0) ?>đ)
+            </option>
+          <?php endwhile; ?>
+        </select>
       </div>
-    </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn-submit">🧾 Nộp phí</button>
-      <a href="dashboard.php" class="btn-back">⬅️ Quay lại</a>
-    </div>
-  </form>
+      <div class="form-group">
+        <label>Hình thức thanh toán:</label>
+        <select name="payment_method" required>
+          <option value="">-- Chọn phương thức --</option>
+          <option value="Cash">💵 Tiền mặt (BCH thu hộ)</option>
+          <option value="VietQR">🏦 Chuyển khoản VietQR</option>
+          <option value="VNPay">🌐 VNPay</option>
+          <option value="MoMo">📱 MoMo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Số tiền cần nộp:</label>
+        <input type="number" name="amount" min="0" step="100" placeholder="VD: 3000" required>
+      </div>
+
+      <?php if ($user['isAdmin'] == 1): ?>
+      <div class="form-group">
+        <label>Người thu hộ (Collector ID):</label>
+        <input type="number" name="collector_id" placeholder="Nhập ID BCH nếu có">
+      </div>
+      <?php endif; ?>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-submit">💾 Ghi nhận thanh toán</button>
+      </div>
+    </form>
+  <?php else: ?>
+    <p>✅ Bạn đã hoàn thành tất cả nghĩa vụ đoàn phí hoặc chưa có kỳ nào cần nộp.</p>
+  <?php endif; ?>
 </div>
 
 <style>
-body {
-  font-family: "Segoe UI", sans-serif;
-  background: #f7f9fc;
-}
 .container {
+  padding: 25px;
   margin-left: 240px;
   max-width: calc(100% - 260px);
-  padding: 40px 30px;
 }
-h2 {
-  color: #2d3436;
-  margin-bottom: 20px;
+h2 { text-align: center; margin-bottom: 20px; color: #2d3436; }
+.form-pay {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
-.form-group {
-  margin-bottom: 20px;
-}
-label {
-  font-weight: 600;
-}
-select, input[type="number"] {
+.form-group { margin-bottom: 18px; }
+label { font-weight: 600; display: block; margin-bottom: 6px; color: #333; }
+input, select {
   width: 100%;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 8px;
   border: 1px solid #ccc;
-  margin-top: 5px;
-}
-.methods {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 10px;
-}
-.methods label {
-  background: #ecf0f1;
-  border-radius: 8px;
-  padding: 10px 15px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-.methods label:hover {
-  background: #dfe6e9;
-}
-.form-actions {
-  margin-top: 25px;
-  display: flex;
-  gap: 10px;
+  border-radius: 6px;
 }
 .btn-submit {
-  background: linear-gradient(135deg, #00b894, #00cec9);
+  background: linear-gradient(135deg, #0984e3, #74b9ff);
   color: white;
   border: none;
-  padding: 12px 20px;
+  padding: 10px 22px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  transition: 0.3s;
 }
-.btn-submit:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 206, 201, 0.3);
-}
-.btn-back {
-  background: #b2bec3;
-  color: white;
-  text-decoration: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-}
-.alert {
-  background: #dff9fb;
-  border-left: 5px solid #00cec9;
-  padding: 12px 15px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  color: #2d3436;
-  font-weight: 500;
-}
+.btn-submit:hover { background: linear-gradient(135deg, #0873d6, #6aa8ff); }
+.success { color: #27ae60; font-weight: bold; }
+.error { color: #d63031; font-weight: bold; }
 </style>
 
 <?php include("../includes/footer.php"); ?>

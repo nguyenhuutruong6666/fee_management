@@ -8,7 +8,6 @@
     <?php endif; ?>
 
     <?php
-    // ✅ Hiển thị menu “Quản lý đoàn viên” cho các cấp: Admin, BCH Trường, BCH Khoa, BCH Chi đoàn
     if (isset($_SESSION['user'])) {
         $role = $_SESSION['user']['role_name'] ?? '';
         if (
@@ -19,7 +18,17 @@
         }
     }
     ?>
-
+    <?php
+    if (isset($_SESSION['user'])) {
+        $role = $_SESSION['user']['role_name'] ?? '';
+        if (
+            $_SESSION['user']['isAdmin'] == 1 ||
+            in_array($role, ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'])
+        ) {
+            echo '<li><a href="manage_transactions.php">🧾 Quản lý giao dịch</a></li>';
+        }
+    }
+    ?>
     <li><a href="profile.php">👤 Thông tin tài khoản</a></li>
   </ul>
 </nav>
