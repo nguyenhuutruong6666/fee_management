@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ✅ Kiểm tra quyền truy cập
+// Kiểm tra quyền truy cập
 if (!isset($_SESSION['user'])) {
     echo "<div class='container'><p style='color:red;'>🚫 Bạn chưa đăng nhập.</p></div>";
     include("../includes/footer.php");
@@ -15,7 +15,7 @@ $currentUser = $_SESSION['user'];
 $role = $currentUser['role_name'] ?? '';
 $userUnit = intval($currentUser['unit'] ?? 0);
 
-// ✅ Chỉ cho phép Admin, BCH Trường, BCH Khoa, BCH Chi đoàn
+// Chỉ cho phép Admin, BCH Trường, BCH Khoa, BCH Chi đoàn
 $allowedRoles = ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'];
 if ($currentUser['isAdmin'] != 1 && !in_array($role, $allowedRoles)) {
     echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
@@ -25,7 +25,7 @@ if ($currentUser['isAdmin'] != 1 && !in_array($role, $allowedRoles)) {
 
 $message = "";
 
-// ✅ Xử lý yêu cầu xóa đoàn viên
+// Xử lý yêu cầu xóa đoàn viên
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_id'])) {
     $deleteId = intval($_POST['delete_id']);
 
@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_id'])) {
     }
 }
 
-// ✅ Lọc dữ liệu theo quyền
+// Lọc dữ liệu theo quyền
 if ($currentUser['isAdmin'] == 1 || $role === 'BCH Trường') {
     $unitFilter = "";
 } elseif ($role === 'BCH Khoa') {
@@ -67,7 +67,7 @@ if ($currentUser['isAdmin'] == 1 || $role === 'BCH Trường') {
     $unitFilter = "WHERE 1=0";
 }
 
-// ✅ Lấy danh sách đoàn viên
+// Lấy danh sách đoàn viên
 $sql = "
     SELECT 
         u.userId, u.userName, u.fullName, u.email, u.identifyCard,

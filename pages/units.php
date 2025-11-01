@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ✅ Kiểm tra quyền truy cập (chỉ Admin)
+// Kiểm tra quyền truy cập (chỉ Admin)
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
@@ -12,7 +12,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
 }
 
 /**
- * 🧩 Hàm đệ quy hiển thị cây tổ chức
+ * Hàm đệ quy hiển thị cây tổ chức
  * Hiển thị các cấp: Trường → Khoa → Chi đoàn
  */
 function renderTree($conn, $parent_id = NULL, $level = 0) {
@@ -76,7 +76,6 @@ function renderTree($conn, $parent_id = NULL, $level = 0) {
 </div>
 
 <style>
-/* ==== CSS giao diện đẹp và dễ nhìn ==== */
 .container {
   padding: 20px;
   max-width: 1000px;

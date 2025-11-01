@@ -17,7 +17,7 @@ $userId = ($currentUser['isAdmin'] && isset($_GET['id']))
     ? intval($_GET['id'])
     : intval($currentUser['userId']);
 
-// ✅ JOIN thêm bảng organization_units để lấy unit_name
+// JOIN thêm bảng organization_units để lấy unit_name
 $query = "
     SELECT 
         u.userId, u.userName, u.fullName, u.email, u.identifyCard, 

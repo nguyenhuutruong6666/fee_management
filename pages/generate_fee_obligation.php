@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ✅ Kiểm tra quyền admin
+// Kiểm tra quyền admin
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập chức năng này.</p></div>";
   include("../includes/footer.php");
@@ -15,7 +15,7 @@ $message = "";
 $total_success = 0;
 $total_failed = 0;
 
-// ✅ Khi admin bấm nút “Sinh nghĩa vụ”
+// Khi admin bấm nút “Sinh nghĩa vụ”
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $cycle_label = trim($_POST['cycle_label'] ?? '');
   $policy_id = intval($_POST['policy_id'] ?? 0);
@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (empty($cycle_label) || $policy_id <= 0) {
     $message = "<p class='error'>⚠️ Vui lòng chọn chính sách và nhập nhãn chu kỳ!</p>";
   } else {
-    // ✅ Lấy thông tin chính sách
+    // Lấy thông tin chính sách
     $policy_sql = "SELECT * FROM fee_policy WHERE id=? AND status='Active' LIMIT 1";
     $stmt = $conn->prepare($policy_sql);
     $stmt->bind_param("i", $policy_id);
@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!$policy) {
       $message = "<p class='error'>❌ Không tìm thấy chính sách đoàn phí đang hiệu lực!</p>";
     } else {
-      // ✅ Lấy quy tắc giảm phí theo vai trò
+      // Lấy quy tắc giảm phí theo vai trò
       $rules = [];
       $rquery = $conn->prepare("SELECT role_name, amount FROM fee_policy_rule WHERE policy_id=?");
       $rquery->bind_param("i", $policy_id);
@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $rules[$r['role_name']] = floatval($r['amount']);
       }
 
-      // ✅ Lấy danh sách đoàn viên
+      // Lấy danh sách đoàn viên
       $sql_users = "
         SELECT u.userId, u.fullName, u.identifyCard, r.role_name
         FROM users u
@@ -67,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $amount = max(0, $amount - $rules[$role]);
           }
 
-          // ✅ Kiểm tra trùng kỳ
+          // Kiểm tra trùng kỳ
           $check = $conn->prepare("SELECT id FROM fee_obligation WHERE user_id=? AND period_label=? LIMIT 1");
           $check->bind_param("is", $u['userId'], $cycle_label);
           $check->execute();
@@ -78,10 +78,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             continue;
           }
 
-          // ✅ Sinh mã tham chiếu
+          // Sinh mã tham chiếu
           $reference = "DV-" . $u['identifyCard'] . "-" . $cycle_label;
 
-          // ✅ Tạo bản ghi nghĩa vụ
+          // Tạo bản ghi nghĩa vụ
           $insert = $conn->prepare("
             INSERT INTO fee_obligation (user_id, policy_id, period_label, amount, due_date, status, reference_code, created_at)
             VALUES (?, ?, ?, ?, ?, 'Chưa nộp', ?, NOW())
@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           }
         }
 
-        // ✅ Ghi log
+        // Ghi log
         $end_time = microtime(true);
         $runtime = round($end_time - $start_time, 2);
 
@@ -113,7 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   }
 }
 
-// ✅ Lấy danh sách chính sách khả dụng
+// Lấy danh sách chính sách khả dụng
 $policies = $conn->query("SELECT id, policy_name, cycle, standard_amount FROM fee_policy WHERE status='Active'");
 ?>
 

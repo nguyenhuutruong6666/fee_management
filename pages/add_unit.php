@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ✅ Chỉ admin mới có quyền
+// Chỉ admin mới có quyền
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");

@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ✅ Chỉ cho phép Quản trị viên truy cập
+// Chỉ cho phép Quản trị viên truy cập
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
@@ -13,7 +13,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
 
 $message = "";
 
-// ✅ Xử lý khi bấm Lưu chính sách
+// Xử lý khi bấm Lưu chính sách
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $policy_name = trim($_POST['policy_name'] ?? '');
   $cycle = $_POST['cycle'] ?? '';
@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (empty($policy_name) || empty($cycle) || $standard_amount <= 0) {
     $message = "<p class='error'>⚠️ Vui lòng nhập đầy đủ thông tin hợp lệ!</p>";
   } else {
-    // ✅ Kiểm tra trùng chính sách hiệu lực cùng chu kỳ
+    // Kiểm tra trùng chính sách hiệu lực cùng chu kỳ
     $check = $conn->prepare("SELECT id FROM fee_policy WHERE cycle=? AND status='Active' LIMIT 1");
     $check->bind_param("s", $cycle);
     $check->execute();
@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($checkResult->num_rows > 0 && $status === 'Active') {
       $message = "<p class='error'>⚠️ Đã có chính sách đang hiệu lực cho chu kỳ này. Vui lòng chọn trạng thái 'Nháp'.</p>";
     } else {
-      // ✅ Thêm vào bảng fee_policy
+      // Thêm vào bảng fee_policy
       $stmt = $conn->prepare("
         INSERT INTO fee_policy (policy_name, cycle, due_day, due_type, standard_amount, status, created_by, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       if ($stmt->execute()) {
         $policy_id = $stmt->insert_id;
 
-        // ✅ Lưu quy tắc giảm phí vào fee_policy_rule
+        // Lưu quy tắc giảm phí vào fee_policy_rule
         $rules = [
           ['BCH Trường', $discount_truong],
           ['BCH Khoa', $discount_khoa],
@@ -64,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           }
         }
 
-        // ✅ Lưu lịch sử áp dụng
+        // Lưu lịch sử áp dụng
         $h = $conn->prepare("
           INSERT INTO fee_policy_history (policy_id, applied_from, is_active, created_at)
           VALUES (?, CURDATE(), ?, NOW())

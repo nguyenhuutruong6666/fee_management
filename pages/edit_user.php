@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ✅ Kiểm tra đăng nhập
+// Kiểm tra đăng nhập
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
@@ -13,14 +13,14 @@ if (!isset($_SESSION['user'])) {
 $currentUser = $_SESSION['user'];
 $userId = isset($_GET['id']) ? intval($_GET['id']) : $currentUser['userId'];
 
-// ✅ Phân quyền: chỉ Admin được sửa người khác
+// Phân quyền: chỉ Admin được sửa người khác
 // if (!$currentUser['isAdmin'] && $currentUser['userId'] !== $userId) {
 //     echo "<div class='container'><p style='color:red;'>❌ Bạn không có quyền chỉnh sửa tài khoản này.</p></div>";
 //     include("../includes/footer.php");
 //     exit();
 // }
 
-// ✅ Lấy thông tin người dùng kèm vai trò & đơn vị
+// Lấy thông tin người dùng kèm vai trò & đơn vị
 $query = "
     SELECT u.*, r.id AS role_id, r.role_name, ou.unit_name
     FROM users u
@@ -39,7 +39,7 @@ $user = $result->fetch_assoc();
 
 $message = "";
 
-// ✅ Xử lý cập nhật khi người dùng nhấn “Lưu”
+// Xử lý cập nhật khi người dùng nhấn “Lưu”
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fullName = trim($_POST['fullName']);
     $email = trim($_POST['email']);
@@ -48,13 +48,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $gender = $_POST['gender'] ?? 'O';
     $role_id = $currentUser['isAdmin'] ? intval($_POST['role_id'] ?? $user['role_id']) : $user['role_id'];
 
-    // 🧩 Nếu là admin mới được cập nhật đơn vị
+    // Nếu là admin mới được cập nhật đơn vị
     $unit = $currentUser['isAdmin'] ? intval($_POST['unit']) : $user['unit'];
 
     if (empty($fullName) || empty($email)) {
         $message = "<p class='error'>⚠️ Vui lòng nhập đầy đủ thông tin.</p>";
     } else {
-        // ✅ Cập nhật bảng users
+        // Cập nhật bảng users
         $stmt = $conn->prepare("
             UPDATE users 
             SET fullName=?, email=?, unit=?, birthDate=?, joinDate=?, gender=? 
@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->bind_param("ssssssi", $fullName, $email, $unit, $birthDate, $joinDate, $gender, $userId);
 
         if ($stmt->execute()) {
-            // ✅ Nếu là admin → cập nhật vai trò
+            // Nếu là admin → cập nhật vai trò
             if ($currentUser['isAdmin']) {
                 $checkRole = $conn->query("SELECT * FROM user_role WHERE user_id=$userId");
                 if ($checkRole->num_rows > 0) {
@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 }
             }
 
-            // ✅ Cập nhật session nếu sửa chính mình
+            // Cập nhật session nếu sửa chính mình
             if ($currentUser['userId'] === $userId) {
                 $_SESSION['user']['fullName'] = $fullName;
                 $_SESSION['user']['email'] = $email;
@@ -89,10 +89,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-// ✅ Lấy danh sách vai trò
+//Lấy danh sách vai trò
 $roles = $conn->query("SELECT id, role_name FROM role ORDER BY id ASC");
 
-// ✅ Lấy danh sách đơn vị từ organization_units
+//Lấy danh sách đơn vị từ organization_units
 $units = $conn->query("SELECT id, unit_name, unit_level FROM organization_units ORDER BY unit_level, unit_name ASC");
 ?>
 

@@ -4,14 +4,14 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ✅ Chỉ Admin mới được vào
+// Chỉ Admin mới được vào
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
     echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
     include("../includes/footer.php");
     exit();
 }
 
-// ✅ Lấy danh sách người dùng (JOIN role + organization_units)
+// Lấy danh sách người dùng (JOIN role + organization_units)
 $sql = "
     SELECT 
         u.userId, u.userName, u.fullName, u.email, u.identifyCard,

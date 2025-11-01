@@ -13,7 +13,7 @@ $user = $_SESSION['user'];
 $role_name = $user['role_name'] ?? '';
 $message = "";
 
-// ✅ Kiểm tra quyền (BCH Trường, BCH Khoa, BCH Chi đoàn)
+// Kiểm tra quyền (BCH Trường, BCH Khoa, BCH Chi đoàn)
 $allowed_roles = ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'];
 if (!in_array($role_name, $allowed_roles) && !$user['isAdmin']) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
@@ -21,7 +21,7 @@ if (!in_array($role_name, $allowed_roles) && !$user['isAdmin']) {
   exit();
 }
 
-// ✅ Cập nhật trạng thái giao dịch
+// Cập nhật trạng thái giao dịch
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id'])) {
   $payment_id = intval($_POST['payment_id']);
   $new_status = $_POST['status'];
@@ -34,12 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id'])) {
   if (!$payment) {
     $message = "<p class='error'>❌ Không tìm thấy giao dịch.</p>";
   } else {
-    // ✅ Cập nhật trạng thái
+    // Cập nhật trạng thái
     $stmt = $conn->prepare("UPDATE fee_payment SET status=?, note=? WHERE id=?");
     $stmt->bind_param("ssi", $new_status, $note, $payment_id);
     $stmt->execute();
 
-    // ✅ Nếu trạng thái = Success → Cập nhật nghĩa vụ + sinh biên lai + ghi sổ quỹ
+    // Nếu trạng thái = Success → Cập nhật nghĩa vụ + sinh biên lai + ghi sổ quỹ
     if ($new_status === 'Success') {
       $obligation_id = $payment['obligation_id'];
       $amount = $payment['amount'];
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id'])) {
   }
 }
 
-// ✅ Lấy danh sách giao dịch (Pending hoặc Need review)
+// Lấy danh sách giao dịch (Pending hoặc Need review)
 $sql = "
   SELECT p.id, p.transaction_code, p.payment_method, p.amount, p.status, p.note, p.payment_date,
          u.fullName AS payer_name, o.period_label, o.status AS obligation_status
@@ -117,7 +117,7 @@ $transactions = $conn->query($sql);
                   <option value="Canceled">Canceled</option>
                 </select>
                 <input type="text" name="note" placeholder="Ghi chú..." value="<?= htmlspecialchars($t['note']) ?>">
-                <button type="submit" class="btn-update">💾</button>
+                <button type="submit" class="btn-update">Lưu</button>
               </form>
             </td>
           </tr>

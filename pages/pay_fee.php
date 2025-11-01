@@ -13,7 +13,7 @@ $user = $_SESSION['user'];
 $user_id = $user['userId'];
 $message = "";
 
-// ✅ Xử lý form thanh toán
+// Xử lý form thanh toán
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $obligation_id = intval($_POST['obligation_id']);
   $method = $_POST['payment_method'];
@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   }
 }
 
-// ✅ Lấy nghĩa vụ chưa nộp của người dùng
+// Lấy nghĩa vụ chưa nộp của người dùng
 $obligations = $conn->query("
   SELECT o.id, o.period_label, o.amount, o.status, p.policy_name
   FROM fee_obligation o

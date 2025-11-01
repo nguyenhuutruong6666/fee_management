@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ✅ Chỉ Admin được vào
+// Chỉ Admin được vào
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
     echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
     include("../includes/footer.php");
@@ -14,13 +14,13 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
 $message = "";
 $previewData = [];
 
-// ✅ Bước 1: Upload & xem trước file CSV
+// Bước 1: Upload & xem trước file CSV
 if (isset($_POST['preview'])) {
     if (is_uploaded_file($_FILES['csv_file']['tmp_name'])) {
         $file = fopen($_FILES['csv_file']['tmp_name'], "r");
         $header = fgetcsv($file); // dòng tiêu đề
 
-        // ✅ Cột chuẩn CSV
+        // Cột chuẩn CSV
         $expected = ["userName","fullName","email","identifyCard","gender","birthDate","joinDate","unit_name","password","role_name","isAdmin"];
         if ($header !== $expected) {
             $message = "<p class='error'>⚠️ File CSV không đúng định dạng. Vui lòng tải lại <a href='../public/templates/users_template.csv'>file mẫu</a>.</p>";
@@ -37,7 +37,7 @@ if (isset($_POST['preview'])) {
     }
 }
 
-// ✅ Bước 2: Import xác nhận vào CSDL
+// Bước 2: Import xác nhận vào CSDL
 if (isset($_POST['import_confirm'])) {
     $data = json_decode($_POST['data'], true);
     $success = 0;
@@ -49,7 +49,7 @@ if (isset($_POST['import_confirm'])) {
         [$userName, $fullName, $email, $identifyCard, $gender, $birthDate, $joinDate, $unit_name, $password, $role_name, $isAdmin] = $row;
         $isAdmin = intval($isAdmin);
 
-        // ✅ Kiểm tra trùng email hoặc CCCD
+        // Kiểm tra trùng email hoặc CCCD
         $check = $conn->prepare("SELECT userId FROM users WHERE email=? OR identifyCard=?");
         $check->bind_param("ss", $email, $identifyCard);
         $check->execute();
@@ -60,7 +60,7 @@ if (isset($_POST['import_confirm'])) {
             continue;
         }
 
-        // ✅ Lấy role_id từ role_name
+        // lấy role_id từ role_name
         $roleQuery = $conn->prepare("SELECT id FROM role WHERE role_name=? LIMIT 1");
         $roleQuery->bind_param("s", $role_name);
         $roleQuery->execute();
@@ -68,7 +68,7 @@ if (isset($_POST['import_confirm'])) {
         $role = $roleRes->fetch_assoc();
         $role_id = $role ? $role['id'] : null;
 
-        // ✅ Lấy unit_id từ unit_name
+        // Lấy unit_id từ unit_name
         $unitQuery = $conn->prepare("SELECT id FROM organization_units WHERE unit_name=? LIMIT 1");
         $unitQuery->bind_param("s", $unit_name);
         $unitQuery->execute();
@@ -101,7 +101,7 @@ if (isset($_POST['import_confirm'])) {
         }
     }
 
-    // ✅ Thông báo kết quả
+    // Thông báo kết quả
     $msg = "✅ Import hoàn tất: $success thành công, $fail lỗi.";
     if (!empty($missingUnits)) $msg .= "\\n⚠️ Đơn vị chưa tồn tại: " . implode(", ", array_unique($missingUnits));
     if (!empty($existingUsers)) $msg .= "\\n⚠️ Người dùng trùng email/CCCD: " . implode(", ", $existingUsers);

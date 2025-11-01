@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password'] ?? '');
     $error = '';
 
-    // ✅ Chuẩn bị câu truy vấn lấy thông tin user + vai trò
+    // Chuẩn bị câu truy vấn lấy thông tin user + vai trò
     $sql = "
         SELECT 
             u.*, 
@@ -24,25 +24,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // ✅ Nếu tồn tại user
+    // Nếu tồn tại user
     if ($result && $result->num_rows > 0) {
         $user = $result->fetch_assoc();
 
-        // ⚠️ So sánh mật khẩu (plain text – có thể nâng cấp thành password_verify)
+        // So sánh mật khẩu (plain text – có thể nâng cấp thành password_verify)
         if ($password === $user['password']) {
             
-            // ✅ Lưu thông tin session đầy đủ
+            // ưu thông tin session đầy đủ
             $_SESSION['user'] = [
                 'userId' => $user['userId'],
                 'userName' => $user['userName'],
                 'fullName' => $user['fullName'],
                 'email' => $user['email'],
                 'isAdmin' => $user['isAdmin'],
-                'role_name' => $user['role_name'] ?? '', // 🔥 Quan trọng
+                'role_name' => $user['role_name'] ?? '', // Quan trọng
                 'unit' => $user['unit'] ?? null
             ];
 
-            // ✅ Chuyển hướng sau khi đăng nhập
+            // Chuyển hướng sau khi đăng nhập
             header("Location: dashboard.php");
             exit();
         } else {

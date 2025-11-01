@@ -4,14 +4,14 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ✅ Chỉ cho phép Admin truy cập
+// Chỉ cho phép Admin truy cập
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
     echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
     include("../includes/footer.php");
     exit();
 }
 
-// ✅ Lấy danh sách vai trò & đơn vị
+// Lấy danh sách vai trò & đơn vị
 $roles = $conn->query("SELECT id, role_name FROM role ORDER BY id ASC");
 $units = $conn->query("SELECT id, unit_name, unit_level FROM organization_units ORDER BY unit_level, unit_name ASC");
 
@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST['password'] ?? '123456'; // mật khẩu mặc định
     $isAdmin = isset($_POST['isAdmin']) ? 1 : 0;
 
-    // ✅ Kiểm tra trùng email hoặc mã SV/CCCD
+    // Kiểm tra trùng email hoặc mã SV/CCCD
     $check = $conn->prepare("SELECT * FROM users WHERE email = ? OR identifyCard = ?");
     $check->bind_param("ss", $email, $identifyCard);
     $check->execute();
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif (empty($userName) || empty($fullName) || empty($email) || empty($role_id) || empty($unit)) {
         $message = "<p class='error'>⚠️ Vui lòng điền đầy đủ thông tin bắt buộc.</p>";
     } else {
-        // ✅ Thêm người dùng mới
+        // Thêm người dùng mới
         $stmt = $conn->prepare("
             INSERT INTO users 
                 (userName, fullName, email, identifyCard, gender, birthDate, joinDate, unit, password, isAdmin, createdAt)
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($stmt->execute()) {
             $newUserId = $stmt->insert_id;
 
-            // ✅ Gán vai trò cho người dùng mới
+            // Gán vai trò cho người dùng mới
             $conn->query("INSERT INTO user_role (user_id, role_id, createdAt) VALUES ($newUserId, $role_id, NOW())");
 
             echo "<script>alert('✅ Tạo tài khoản thành công!'); window.location.href='users.php';</script>";
