@@ -11,9 +11,17 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
     exit();
 }
 
-// ✅ Lấy danh sách người dùng
-$sql = "SELECT userId, userName, fullName, email, role, unit, gender, birthDate, joinDate, isAdmin, createdAt 
-        FROM users ORDER BY userId ASC";
+// ✅ Lấy danh sách người dùng (JOIN để lấy vai trò từ bảng role)
+$sql = "
+    SELECT 
+        u.userId, u.userName, u.fullName, u.email, u.identifyCard,
+        u.gender, u.birthDate, u.joinDate, u.unit, u.isAdmin, u.createdAt,
+        r.role_name
+    FROM users u
+    LEFT JOIN user_role ur ON u.userId = ur.user_id
+    LEFT JOIN role r ON ur.role_id = r.id
+    ORDER BY u.userId ASC
+";
 $result = $conn->query($sql);
 ?>
 
@@ -22,6 +30,7 @@ $result = $conn->query($sql);
 
   <div class="actions">
     <a href="add_user.php" class="btn-add">➕ Thêm người dùng</a>
+    <a href="import_users.php" class="btn-import">📂 Import danh sách</a>
   </div>
 
   <table class="table">
@@ -31,6 +40,7 @@ $result = $conn->query($sql);
         <th>Tên đăng nhập</th>
         <th>Họ và tên</th>
         <th>Email</th>
+        <th>MSV/CCCD</th>
         <th>Giới tính</th>
         <th>Năm sinh</th>
         <th>Ngày vào Đoàn</th>
@@ -47,6 +57,7 @@ $result = $conn->query($sql);
             <td><?= htmlspecialchars($row['userName']) ?></td>
             <td><?= htmlspecialchars($row['fullName']) ?></td>
             <td><?= htmlspecialchars($row['email']) ?></td>
+            <td><?= htmlspecialchars($row['identifyCard'] ?? '-') ?></td>
             <td>
               <?php 
                 if ($row['gender'] == 'M') echo 'Nam';
@@ -56,45 +67,62 @@ $result = $conn->query($sql);
             </td>
             <td><?= $row['birthDate'] ? date("d/m/Y", strtotime($row['birthDate'])) : '-' ?></td>
             <td><?= $row['joinDate'] ? date("d/m/Y", strtotime($row['joinDate'])) : '-' ?></td>
-            <td><?= htmlspecialchars($row['unit']) ?></td>
-            <td><?= htmlspecialchars($row['role']) ?></td>
+            <td><?= htmlspecialchars($row['unit'] ?? '-') ?></td>
+            <td><?= htmlspecialchars($row['role_name'] ?? 'Chưa gán') ?></td>
             <td class="actions-cell">
-              <a href="edit_user.php?id=<?= $row['userId'] ?>" class="btn-edit">✏️</a>
+              <a href="edit_user.php?id=<?= $row['userId'] ?>" class="btn-edit" title="Sửa">✏️</a>
               <a href="delete_user.php?id=<?= $row['userId'] ?>" class="btn-delete" 
-                 onclick="return confirm('Bạn có chắc muốn xóa người dùng này không?');">🗑️</a>
+                 onclick="return confirm('Bạn có chắc muốn xóa người dùng này không?');" title="Xóa">🗑️</a>
             </td>
           </tr>
         <?php endwhile; ?>
       <?php else: ?>
-        <tr><td colspan="12" style="text-align:center;">Không có người dùng nào</td></tr>
+        <tr><td colspan="11" style="text-align:center;">Không có người dùng nào</td></tr>
       <?php endif; ?>
     </tbody>
   </table>
 </div>
 
 <style>
-  .actions {
-    text-align: right;
-    margin-bottom: 10px;
+  .container {
+    padding: 20px;
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #2d3436;
   }
 
-  .btn-add {
-    background: #28a745;
+  /* --- Action buttons --- */
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+
+  .btn-add, .btn-import {
     color: white;
     padding: 8px 15px;
     border-radius: 6px;
     text-decoration: none;
     font-weight: 500;
+    transition: 0.2s;
   }
 
-  .btn-add:hover {
-    background: #218838;
-  }
+  .btn-add { background: #28a745; }
+  .btn-add:hover { background: #218838; }
 
+  .btn-import { background: #17a2b8; }
+  .btn-import:hover { background: #138496; }
+
+  /* --- Table --- */
   table {
     width: 100%;
     border-collapse: collapse;
     font-size: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
   }
 
   th, td {
@@ -108,26 +136,19 @@ $result = $conn->query($sql);
     color: white;
   }
 
-  tr:nth-child(even) {
-    background: #f9f9f9;
-  }
-
-  tr:hover {
-    background: #f1f9ff;
-  }
+  tr:nth-child(even) { background: #f9f9f9; }
+  tr:hover { background: #eaf3ff; }
 
   .btn-edit, .btn-delete {
     text-decoration: none;
     padding: 6px 10px;
     border-radius: 5px;
-    margin: 0 2px;
     color: white;
     font-size: 14px;
   }
 
   .btn-edit { background: #007bff; }
   .btn-delete { background: #dc3545; }
-
   .btn-edit:hover { background: #0056b3; }
   .btn-delete:hover { background: #c82333; }
 

@@ -12,16 +12,23 @@ if (!isset($_SESSION['user'])) {
 
 $currentUser = $_SESSION['user'];
 
-// Nếu là Admin thì có thể xem tài khoản người khác qua GET id
-if ($currentUser['isAdmin'] && isset($_GET['id'])) {
-    $userId = intval($_GET['id']);
-    $query = "SELECT * FROM users WHERE userId = $userId";
-} else {
-    // Người dùng thường chỉ xem chính mình
-    $userId = intval($currentUser['userId']);
-    $query = "SELECT * FROM users WHERE userId = $userId";
-}
+// Nếu là admin và có id → xem người khác, ngược lại chỉ xem chính mình
+$userId = ($currentUser['isAdmin'] && isset($_GET['id']))
+    ? intval($_GET['id'])
+    : intval($currentUser['userId']);
 
+// JOIN 3 bảng để lấy đầy đủ thông tin
+$query = "
+    SELECT 
+        u.userId, u.userName, u.fullName, u.email, u.identifyCard, 
+        u.gender, u.birthDate, u.joinDate, u.unit, u.isAdmin, u.createdAt, 
+        r.role_name
+    FROM users u
+    LEFT JOIN user_role ur ON u.userId = ur.user_id
+    LEFT JOIN role r ON ur.role_id = r.id
+    WHERE u.userId = $userId
+    LIMIT 1
+";
 $result = $conn->query($query);
 $user = $result->fetch_assoc();
 
@@ -31,6 +38,7 @@ if (!$user) {
     exit();
 }
 ?>
+
 <div class="container">
   <h2>👤 Thông tin tài khoản</h2>
 
@@ -40,64 +48,34 @@ if (!$user) {
         <img src="../public/img/avt.png" alt="avatar">
       </div>
       <div class="info">
-        <h3><?= htmlspecialchars($user['fullName']) ?></h3>
-        <p><b>Vai trò:</b> <?= htmlspecialchars($user['role']) ?></p>
-        <p><b>Đơn vị:</b> <?= htmlspecialchars($user['unit']) ?></p>
+        <h3><?= htmlspecialchars($user['fullName'] ?? 'Chưa cập nhật') ?></h3>
+        <p><b>Vai trò:</b> <?= htmlspecialchars($user['role_name'] ?? 'Chưa gán vai trò') ?></p>
+        <p><b>Đơn vị:</b> <?= htmlspecialchars($user['unit'] ?? 'Chưa cập nhật') ?></p>
         <p><b>Trạng thái:</b> <?= ($user['isAdmin'] ? '🛡️ Quản trị viên' : '✅ Hoạt động') ?></p>
       </div>
     </div>
 
     <div class="profile-body">
       <table class="table profile-table">
-        <tr>
-          <th>Tên đăng nhập:</th>
-          <td><?= htmlspecialchars($user['userName']) ?></td>
-        </tr>
-        <tr>
-          <th>Họ và tên:</th>
-          <td><?= htmlspecialchars($user['fullName']) ?></td>
-        </tr>
-        <tr>
-          <th>Email:</th>
-          <td><?= htmlspecialchars($user['email']) ?></td>
-        </tr>
-        <tr>
-          <th>Năm sinh:</th>
-          <td>
-            <?= isset($user['birthDate']) && $user['birthDate'] ? date("d/m/Y", strtotime($user['birthDate'])) : "Chưa cập nhật" ?>
-          </td>
-        </tr>
-        <tr>
-          <th>Giới tính:</th>
+        <tr><th>Tên đăng nhập:</th><td><?= htmlspecialchars($user['userName']) ?></td></tr>
+        <tr><th>Họ và tên:</th><td><?= htmlspecialchars($user['fullName']) ?></td></tr>
+        <tr><th>Email:</th><td><?= htmlspecialchars($user['email']) ?></td></tr>
+        <tr><th>MSV/CCCD:</th><td><?= htmlspecialchars($user['identifyCard'] ?? 'Chưa cập nhật') ?></td></tr>
+        <tr><th>Năm sinh:</th><td><?= $user['birthDate'] ? date("d/m/Y", strtotime($user['birthDate'])) : 'Chưa cập nhật' ?></td></tr>
+        <tr><th>Giới tính:</th>
           <td>
             <?php
-              if (isset($user['gender'])) {
-                echo ($user['gender'] === 'M') ? 'Nam' :
-                    (($user['gender'] === 'F') ? 'Nữ' : 'Khác');
-              } else {
-                echo "Chưa cập nhật";
-              }
+              if ($user['gender'] === 'M') echo 'Nam';
+              elseif ($user['gender'] === 'F') echo 'Nữ';
+              elseif ($user['gender'] === 'O') echo 'Khác';
+              else echo 'Chưa cập nhật';
             ?>
           </td>
         </tr>
-        <tr>
-          <th>Ngày vào Đoàn:</th>
-          <td>
-            <?= isset($user['joinDate']) && $user['joinDate'] ? date("d/m/Y", strtotime($user['joinDate'])) : "Chưa cập nhật" ?>
-          </td>
-        </tr>
-        <tr>
-          <th>Vai trò:</th>
-          <td><?= htmlspecialchars($user['role']) ?></td>
-        </tr>
-        <tr>
-          <th>Đơn vị:</th>
-          <td><?= htmlspecialchars($user['unit']) ?></td>
-        </tr>
-        <tr>
-          <th>Ngày tạo:</th>
-          <td><?= date("d/m/Y", strtotime($user['createdAt'])) ?></td>
-        </tr>
+        <tr><th>Ngày vào Đoàn:</th><td><?= $user['joinDate'] ? date("d/m/Y", strtotime($user['joinDate'])) : 'Chưa cập nhật' ?></td></tr>
+        <tr><th>Vai trò:</th><td><?= htmlspecialchars($user['role_name']) ?></td></tr>
+        <tr><th>Đơn vị:</th><td><?= htmlspecialchars($user['unit'] ?? 'Chưa cập nhật') ?></td></tr>
+        <tr><th>Ngày tạo:</th><td><?= date("d/m/Y", strtotime($user['createdAt'])) ?></td></tr>
       </table>
     </div>
     
@@ -114,7 +92,7 @@ if (!$user) {
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   padding: 20px;
-  max-width: 700px;
+  max-width: 750px;
   margin: 30px auto;
 }
 .profile-header {

@@ -1,0 +1,150 @@
+<?php
+session_start();
+include("../includes/header.php");
+include("../includes/navbar.php");
+include("../config/db.php");
+
+if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
+    echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+    include("../includes/footer.php");
+    exit();
+}
+
+$message = "";
+$previewData = [];
+
+// ✅ Bước 1: Upload & Xem trước
+if (isset($_POST['preview'])) {
+    if (is_uploaded_file($_FILES['csv_file']['tmp_name'])) {
+        $file = fopen($_FILES['csv_file']['tmp_name'], "r");
+        $header = fgetcsv($file); // dòng tiêu đề
+
+        // ✅ Kiểm tra định dạng cột
+        $expected = ["userName","fullName","email","identifyCard","gender","birthDate","joinDate","unit","password","role_name","isAdmin"];
+        if ($header !== $expected) {
+            $message = "<p class='error'>⚠️ File CSV không đúng định dạng mẫu. Hãy tải lại <a href='../public/templates/users_template.csv'>file mẫu</a>.</p>";
+        } else {
+            while (($row = fgetcsv($file)) !== FALSE) {
+                $previewData[] = $row;
+            }
+        }
+        fclose($file);
+    } else {
+        $message = "<p class='error'>❌ Chưa chọn file CSV.</p>";
+    }
+}
+
+// ✅ Bước 2: Lưu vào CSDL
+if (isset($_POST['import_confirm'])) {
+    $data = json_decode($_POST['data'], true);
+    $success = 0;
+    $fail = 0;
+
+    foreach ($data as $row) {
+        [$userName, $fullName, $email, $identifyCard, $gender, $birthDate, $joinDate, $unit, $password, $role_name, $isAdmin] = $row;
+        $isAdmin = intval($isAdmin);
+
+        // Kiểm tra trùng
+        $check = $conn->prepare("SELECT * FROM users WHERE email=? OR identifyCard=?");
+        $check->bind_param("ss", $email, $identifyCard);
+        $check->execute();
+        $r = $check->get_result();
+
+        if ($r->num_rows == 0) {
+            // Lấy role_id theo role_name
+            $roleQuery = $conn->prepare("SELECT id FROM role WHERE role_name=? LIMIT 1");
+            $roleQuery->bind_param("s", $role_name);
+            $roleQuery->execute();
+            $roleRes = $roleQuery->get_result();
+            $role = $roleRes->fetch_assoc();
+            $role_id = $role ? $role['id'] : null;
+
+            if ($role_id) {
+                // Thêm user
+                $stmt = $conn->prepare("INSERT INTO users (userName, fullName, email, identifyCard, gender, birthDate, joinDate, unit, password, isAdmin, createdAt)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                $stmt->bind_param("sssssssssi", $userName, $fullName, $email, $identifyCard, $gender, $birthDate, $joinDate, $unit, $password, $isAdmin);
+                if ($stmt->execute()) {
+                    $userId = $stmt->insert_id;
+                    $conn->query("INSERT INTO user_role (user_id, role_id, createdAt) VALUES ($userId, $role_id, NOW())");
+                    $success++;
+                } else {
+                    $fail++;
+                }
+            } else {
+                $fail++;
+            }
+        } else {
+            $fail++;
+        }
+    }
+
+    echo "<script>alert('✅ Import hoàn tất: $success thành công, $fail lỗi!'); window.location.href='users.php';</script>";
+    exit();
+}
+?>
+
+<div class="container">
+  <h2>📂 Import danh sách người dùng</h2>
+  <?= $message ?>
+
+  <form method="POST" enctype="multipart/form-data" class="form-import">
+    <div class="form-group">
+      <label>Chọn file CSV:</label>
+      <input type="file" name="csv_file" accept=".csv" required>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" name="preview" class="btn-preview">👁️ Xem trước</button>
+      <a href="../public/templates/users_template.csv" class="btn-template" download>⬇️ Tải file mẫu</a>
+      <a href="users.php" class="btn-back">⬅️ Quay lại</a>
+    </div>
+  </form>
+
+  <?php if (!empty($previewData)): ?>
+    <h3>🔍 Bản xem trước:</h3>
+    <form method="POST">
+      <input type="hidden" name="data" value='<?= json_encode($previewData) ?>'>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tên đăng nhập</th><th>Họ tên</th><th>Email</th><th>Mã SV/CCCD</th>
+            <th>Giới tính</th><th>Ngày sinh</th><th>Ngày vào Đoàn</th>
+            <th>Đơn vị</th><th>Vai trò</th><th>Admin</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($previewData as $row): ?>
+            <tr>
+              <?php for ($i = 0; $i < 11; $i++): ?>
+                <td><?= htmlspecialchars($row[$i]) ?></td>
+              <?php endfor; ?>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+      <button type="submit" name="import_confirm" class="btn-save">💾 Xác nhận Import</button>
+    </form>
+  <?php endif; ?>
+</div>
+
+<style>
+.container { padding: 20px; }
+.form-import { margin-bottom: 20px; }
+.form-actions { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+input[type="file"] { border: 1px solid #ccc; padding: 8px; border-radius: 6px; }
+.btn-preview, .btn-template, .btn-save, .btn-back {
+  padding: 8px 15px; border-radius: 6px; color: #fff; text-decoration: none; border: none; cursor: pointer;
+}
+.btn-preview { background: #007bff; }
+.btn-template { background: #00b894; }
+.btn-save { background: #28a745; margin-top: 10px; }
+.btn-back { background: #b2bec3; }
+.table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th, td { border: 1px solid #ddd; padding: 6px; text-align: center; }
+th { background: #0984e3; color: white; }
+tr:nth-child(even) { background: #f9f9f9; }
+.error { color: #d63031; font-weight: bold; }
+</style>
+
+<?php include("../includes/footer.php"); ?>

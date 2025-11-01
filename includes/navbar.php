@@ -4,6 +4,9 @@
         <?php if (isset($_SESSION['user']) && $_SESSION['user']['isAdmin']): ?>
             <li><a href="users.php">Quản lý người dùng</a></li>
         <?php endif; ?>
+        <?php if (isset($_SESSION['user']) && $_SESSION['user']['isAdmin']): ?>
+            <li><a href="units.php">Cấu hình tổ chức</a></li>
+        <?php endif; ?>
         <li><a href="profile.php">Thông tin tài khoản</a></li>
     </ul>
 </nav>
