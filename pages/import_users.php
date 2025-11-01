@@ -110,7 +110,7 @@ if (isset($_POST['import_confirm'])) {
           <tr>
             <th>Tên đăng nhập</th><th>Họ tên</th><th>Email</th><th>Mã SV/CCCD</th>
             <th>Giới tính</th><th>Ngày sinh</th><th>Ngày vào Đoàn</th>
-            <th>Đơn vị</th><th>Vai trò</th><th>Admin</th>
+            <th>Đơn vị</th><th>Mật khẩu</th><th>Vai trò</th><th>Admin</th>
           </tr>
         </thead>
         <tbody>
