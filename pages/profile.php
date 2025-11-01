@@ -17,18 +17,21 @@ $userId = ($currentUser['isAdmin'] && isset($_GET['id']))
     ? intval($_GET['id'])
     : intval($currentUser['userId']);
 
-// JOIN 3 bảng để lấy đầy đủ thông tin
+// ✅ JOIN thêm bảng organization_units để lấy unit_name
 $query = "
     SELECT 
         u.userId, u.userName, u.fullName, u.email, u.identifyCard, 
         u.gender, u.birthDate, u.joinDate, u.unit, u.isAdmin, u.createdAt, 
-        r.role_name
+        r.role_name,
+        ou.unit_name AS unit_name
     FROM users u
     LEFT JOIN user_role ur ON u.userId = ur.user_id
     LEFT JOIN role r ON ur.role_id = r.id
+    LEFT JOIN organization_units ou ON u.unit = ou.id
     WHERE u.userId = $userId
     LIMIT 1
 ";
+
 $result = $conn->query($query);
 $user = $result->fetch_assoc();
 
@@ -50,7 +53,7 @@ if (!$user) {
       <div class="info">
         <h3><?= htmlspecialchars($user['fullName'] ?? 'Chưa cập nhật') ?></h3>
         <p><b>Vai trò:</b> <?= htmlspecialchars($user['role_name'] ?? 'Chưa gán vai trò') ?></p>
-        <p><b>Đơn vị:</b> <?= htmlspecialchars($user['unit'] ?? 'Chưa cập nhật') ?></p>
+        <p><b>Đơn vị:</b> <?= htmlspecialchars($user['unit_name'] ?? 'Chưa cập nhật') ?></p>
         <p><b>Trạng thái:</b> <?= ($user['isAdmin'] ? '🛡️ Quản trị viên' : '✅ Hoạt động') ?></p>
       </div>
     </div>
@@ -74,7 +77,7 @@ if (!$user) {
         </tr>
         <tr><th>Ngày vào Đoàn:</th><td><?= $user['joinDate'] ? date("d/m/Y", strtotime($user['joinDate'])) : 'Chưa cập nhật' ?></td></tr>
         <tr><th>Vai trò:</th><td><?= htmlspecialchars($user['role_name']) ?></td></tr>
-        <tr><th>Đơn vị:</th><td><?= htmlspecialchars($user['unit'] ?? 'Chưa cập nhật') ?></td></tr>
+        <tr><th>Đơn vị:</th><td><?= htmlspecialchars($user['unit_name'] ?? 'Chưa cập nhật') ?></td></tr>
         <tr><th>Ngày tạo:</th><td><?= date("d/m/Y", strtotime($user['createdAt'])) ?></td></tr>
       </table>
     </div>
@@ -107,29 +110,15 @@ if (!$user) {
   border-radius: 50%;
   margin-right: 20px;
 }
-.profile-header .info h3 {
-  margin: 0;
-  color: #2d3436;
-}
-.profile-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
+.profile-header .info h3 { margin: 0; color: #2d3436; }
+.profile-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
 .profile-table th {
-  text-align: left;
-  width: 30%;
-  color: #555;
-  padding: 8px;
+  text-align: left; width: 30%; color: #555; padding: 8px;
 }
 .profile-table td {
-  color: #2d3436;
-  padding: 8px;
+  color: #2d3436; padding: 8px;
 }
-.profile-footer {
-  text-align: right;
-  margin-top: 15px;
-}
+.profile-footer { text-align: right; margin-top: 15px; }
 .btn-edit, .btn-password {
   display: inline-block;
   padding: 8px 14px;

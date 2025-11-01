@@ -11,8 +11,9 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
     exit();
 }
 
-// ✅ Lấy danh sách vai trò từ bảng role
+// ✅ Lấy danh sách vai trò & đơn vị
 $roles = $conn->query("SELECT id, role_name FROM role ORDER BY id ASC");
+$units = $conn->query("SELECT id, unit_name, unit_level FROM organization_units ORDER BY unit_level, unit_name ASC");
 
 $message = "";
 
@@ -24,12 +25,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $gender = $_POST['gender'] ?? 'O';
     $birthDate = $_POST['birthDate'] ?? null;
     $joinDate = $_POST['joinDate'] ?? null;
-    $unit = trim($_POST['unit']);
+    $unit = intval($_POST['unit']);
     $role_id = intval($_POST['role']);
     $password = $_POST['password'] ?? '123456'; // mật khẩu mặc định
     $isAdmin = isset($_POST['isAdmin']) ? 1 : 0;
 
-    // ✅ Kiểm tra trùng lặp email hoặc mã SV
+    // ✅ Kiểm tra trùng email hoặc mã SV/CCCD
     $check = $conn->prepare("SELECT * FROM users WHERE email = ? OR identifyCard = ?");
     $check->bind_param("ss", $email, $identifyCard);
     $check->execute();
@@ -37,12 +38,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($checkResult->num_rows > 0) {
         $message = "<p class='error'>⚠️ Email hoặc mã SV/CCCD đã tồn tại trong hệ thống!</p>";
-    } elseif (empty($userName) || empty($fullName) || empty($email) || empty($role_id)) {
+    } elseif (empty($userName) || empty($fullName) || empty($email) || empty($role_id) || empty($unit)) {
         $message = "<p class='error'>⚠️ Vui lòng điền đầy đủ thông tin bắt buộc.</p>";
     } else {
-        // ✅ Thêm người dùng
+        // ✅ Thêm người dùng mới
         $stmt = $conn->prepare("
-            INSERT INTO users (userName, fullName, email, identifyCard, gender, birthDate, joinDate, unit, password, isAdmin, createdAt)
+            INSERT INTO users 
+                (userName, fullName, email, identifyCard, gender, birthDate, joinDate, unit, password, isAdmin, createdAt)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
         $stmt->bind_param("sssssssssi", $userName, $fullName, $email, $identifyCard, $gender, $birthDate, $joinDate, $unit, $password, $isAdmin);
@@ -53,15 +55,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // ✅ Gán vai trò cho người dùng mới
             $conn->query("INSERT INTO user_role (user_id, role_id, createdAt) VALUES ($newUserId, $role_id, NOW())");
 
-            $message = "<p class='success'>✅ Tạo tài khoản thành công!</p>";
-
-            // ✅ Sau khi tạo, chuyển về danh sách người dùng
             echo "<script>alert('✅ Tạo tài khoản thành công!'); window.location.href='users.php';</script>";
             exit();
         } else {
             $message = "<p class='error'>❌ Lỗi khi tạo tài khoản. Vui lòng thử lại.</p>";
         }
-
         $stmt->close();
     }
 }
@@ -113,7 +111,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <div class="form-group">
       <label>Đơn vị:</label>
-      <input type="text" name="unit" required>
+      <select name="unit" required>
+        <option value="">-- Chọn đơn vị --</option>
+        <?php while ($u = $units->fetch_assoc()): ?>
+          <option value="<?= $u['id'] ?>">
+            <?= htmlspecialchars($u['unit_name']) ?> (<?= $u['unit_level'] ?>)
+          </option>
+        <?php endwhile; ?>
+      </select>
     </div>
 
     <div class="form-group">
@@ -141,6 +146,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <style>
 .container {
   padding: 20px;
+  max-width: 750px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 h2 {
   text-align: center;

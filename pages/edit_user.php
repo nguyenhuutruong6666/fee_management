@@ -1,10 +1,10 @@
-<?php
+<?php 
 session_start();
 include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// Kiểm tra đăng nhập
+// ✅ Kiểm tra đăng nhập
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
@@ -13,19 +13,20 @@ if (!isset($_SESSION['user'])) {
 $currentUser = $_SESSION['user'];
 $userId = isset($_GET['id']) ? intval($_GET['id']) : $currentUser['userId'];
 
-// Phân quyền: chỉ Admin được sửa người khác
+// ✅ Phân quyền: chỉ Admin được sửa người khác
 // if (!$currentUser['isAdmin'] && $currentUser['userId'] !== $userId) {
 //     echo "<div class='container'><p style='color:red;'>❌ Bạn không có quyền chỉnh sửa tài khoản này.</p></div>";
 //     include("../includes/footer.php");
 //     exit();
 // }
 
-// Lấy thông tin user và vai trò
+// ✅ Lấy thông tin người dùng kèm vai trò & đơn vị
 $query = "
-    SELECT u.*, r.id AS role_id, r.role_name
+    SELECT u.*, r.id AS role_id, r.role_name, ou.unit_name
     FROM users u
     LEFT JOIN user_role ur ON u.userId = ur.user_id
     LEFT JOIN role r ON ur.role_id = r.id
+    LEFT JOIN organization_units ou ON u.unit = ou.id
     WHERE u.userId = $userId
 ";
 $result = $conn->query($query);
@@ -38,20 +39,22 @@ $user = $result->fetch_assoc();
 
 $message = "";
 
-// Xử lý cập nhật khi người dùng nhấn Lưu
+// ✅ Xử lý cập nhật khi người dùng nhấn “Lưu”
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fullName = trim($_POST['fullName']);
     $email = trim($_POST['email']);
-    $unit = trim($_POST['unit']);
     $birthDate = $_POST['birthDate'] ?? null;
     $joinDate = $_POST['joinDate'] ?? null;
     $gender = $_POST['gender'] ?? 'O';
     $role_id = $currentUser['isAdmin'] ? intval($_POST['role_id'] ?? $user['role_id']) : $user['role_id'];
 
-    if (empty($fullName) || empty($email) || empty($unit)) {
+    // 🧩 Nếu là admin mới được cập nhật đơn vị
+    $unit = $currentUser['isAdmin'] ? intval($_POST['unit']) : $user['unit'];
+
+    if (empty($fullName) || empty($email)) {
         $message = "<p class='error'>⚠️ Vui lòng nhập đầy đủ thông tin.</p>";
     } else {
-        // Cập nhật bảng users
+        // ✅ Cập nhật bảng users
         $stmt = $conn->prepare("
             UPDATE users 
             SET fullName=?, email=?, unit=?, birthDate=?, joinDate=?, gender=? 
@@ -60,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->bind_param("ssssssi", $fullName, $email, $unit, $birthDate, $joinDate, $gender, $userId);
 
         if ($stmt->execute()) {
-            // Nếu là admin thì cập nhật vai trò
+            // ✅ Nếu là admin → cập nhật vai trò
             if ($currentUser['isAdmin']) {
                 $checkRole = $conn->query("SELECT * FROM user_role WHERE user_id=$userId");
                 if ($checkRole->num_rows > 0) {
@@ -70,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 }
             }
 
-            // Cập nhật session nếu sửa chính mình
+            // ✅ Cập nhật session nếu sửa chính mình
             if ($currentUser['userId'] === $userId) {
                 $_SESSION['user']['fullName'] = $fullName;
                 $_SESSION['user']['email'] = $email;
@@ -86,8 +89,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-// Lấy danh sách vai trò để hiển thị trong select box
+// ✅ Lấy danh sách vai trò
 $roles = $conn->query("SELECT id, role_name FROM role ORDER BY id ASC");
+
+// ✅ Lấy danh sách đơn vị từ organization_units
+$units = $conn->query("SELECT id, unit_name, unit_level FROM organization_units ORDER BY unit_level, unit_name ASC");
 ?>
 
 <div class="container">
@@ -134,10 +140,25 @@ $roles = $conn->query("SELECT id, role_name FROM role ORDER BY id ASC");
       <input type="date" name="joinDate" value="<?= htmlspecialchars($user['joinDate'] ?? '') ?>">
     </div>
 
-    <div class="form-group">
-      <label>Đơn vị:</label>
-      <input type="text" name="unit" value="<?= htmlspecialchars($user['unit']) ?>" required>
-    </div>
+    <?php if ($currentUser['isAdmin']): ?>
+      <div class="form-group">
+        <label>Đơn vị:</label>
+        <select name="unit" required>
+          <option value="">-- Chọn đơn vị --</option>
+          <?php while ($u = $units->fetch_assoc()): ?>
+            <option value="<?= $u['id'] ?>" 
+              <?= ($user['unit'] == $u['id']) ? 'selected' : '' ?>>
+              <?= htmlspecialchars($u['unit_name']) ?> (<?= $u['unit_level'] ?>)
+            </option>
+          <?php endwhile; ?>
+        </select>
+      </div>
+    <?php else: ?>
+      <div class="form-group">
+        <label>Đơn vị:</label>
+        <input type="text" value="<?= htmlspecialchars($user['unit_name']) ?>" disabled>
+      </div>
+    <?php endif; ?>
 
     <?php if ($currentUser['isAdmin']): ?>
       <div class="form-group">

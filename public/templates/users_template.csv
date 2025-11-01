@@ -1,3 +1,3 @@
-userName,fullName,email,identifyCard,gender,birthDate,joinDate,unit,password,role_name,isAdmin
-khoa001,Nguyen Van Khoa,khoa001@hnue.edu.vn,123456789,M,2001-05-12,2018-03-20,Khoa Toan,123456,BCH Khoa,0
-hoang002,Tran Thi Hoang,hoang002@hnue.edu.vn,987654321,F,2002-08-10,2019-05-15,Khoa Van,123456,Đoàn viên,0
+userName,fullName,email,identifyCard,gender,birthDate,joinDate,unit_name,password,role_name,isAdmin
+sv01,Nguyen Van A,sv01@hnue.edu.vn,123456789a,M,2001-01-01,2020-03-26,Khoa CNTT,123456,BCH Khoa,0
+sv02,Tran Thi B,sv02@hnue.edu.vn,987654321a,F,2002-04-15,2021-02-20,Chi đoàn k72E3,123456,Đoàn viên,0

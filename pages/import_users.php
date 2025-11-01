@@ -4,6 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
+// ✅ Chỉ Admin được vào
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
     echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
     include("../includes/footer.php");
@@ -13,64 +14,85 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
 $message = "";
 $previewData = [];
 
-// ✅ Bước 1: Upload & Xem trước
+// ✅ Bước 1: Upload & xem trước file CSV
 if (isset($_POST['preview'])) {
     if (is_uploaded_file($_FILES['csv_file']['tmp_name'])) {
         $file = fopen($_FILES['csv_file']['tmp_name'], "r");
         $header = fgetcsv($file); // dòng tiêu đề
 
-        // ✅ Kiểm tra định dạng cột
-        $expected = ["userName","fullName","email","identifyCard","gender","birthDate","joinDate","unit","password","role_name","isAdmin"];
+        // ✅ Cột chuẩn CSV
+        $expected = ["userName","fullName","email","identifyCard","gender","birthDate","joinDate","unit_name","password","role_name","isAdmin"];
         if ($header !== $expected) {
-            $message = "<p class='error'>⚠️ File CSV không đúng định dạng mẫu. Hãy tải lại <a href='../public/templates/users_template.csv'>file mẫu</a>.</p>";
+            $message = "<p class='error'>⚠️ File CSV không đúng định dạng. Vui lòng tải lại <a href='../public/templates/users_template.csv'>file mẫu</a>.</p>";
         } else {
             while (($row = fgetcsv($file)) !== FALSE) {
-                $previewData[] = $row;
+                if (count($row) == count($expected)) {
+                    $previewData[] = $row;
+                }
             }
         }
         fclose($file);
     } else {
-        $message = "<p class='error'>❌ Chưa chọn file CSV.</p>";
+        $message = "<p class='error'>❌ Bạn chưa chọn file CSV để tải lên.</p>";
     }
 }
 
-// ✅ Bước 2: Lưu vào CSDL
+// ✅ Bước 2: Import xác nhận vào CSDL
 if (isset($_POST['import_confirm'])) {
     $data = json_decode($_POST['data'], true);
     $success = 0;
     $fail = 0;
+    $missingUnits = [];
+    $existingUsers = [];
 
     foreach ($data as $row) {
-        [$userName, $fullName, $email, $identifyCard, $gender, $birthDate, $joinDate, $unit, $password, $role_name, $isAdmin] = $row;
+        [$userName, $fullName, $email, $identifyCard, $gender, $birthDate, $joinDate, $unit_name, $password, $role_name, $isAdmin] = $row;
         $isAdmin = intval($isAdmin);
 
-        // Kiểm tra trùng
-        $check = $conn->prepare("SELECT * FROM users WHERE email=? OR identifyCard=?");
+        // ✅ Kiểm tra trùng email hoặc CCCD
+        $check = $conn->prepare("SELECT userId FROM users WHERE email=? OR identifyCard=?");
         $check->bind_param("ss", $email, $identifyCard);
         $check->execute();
-        $r = $check->get_result();
+        $res = $check->get_result();
+        if ($res->num_rows > 0) {
+            $existingUsers[] = $email;
+            $fail++;
+            continue;
+        }
 
-        if ($r->num_rows == 0) {
-            // Lấy role_id theo role_name
-            $roleQuery = $conn->prepare("SELECT id FROM role WHERE role_name=? LIMIT 1");
-            $roleQuery->bind_param("s", $role_name);
-            $roleQuery->execute();
-            $roleRes = $roleQuery->get_result();
-            $role = $roleRes->fetch_assoc();
-            $role_id = $role ? $role['id'] : null;
+        // ✅ Lấy role_id từ role_name
+        $roleQuery = $conn->prepare("SELECT id FROM role WHERE role_name=? LIMIT 1");
+        $roleQuery->bind_param("s", $role_name);
+        $roleQuery->execute();
+        $roleRes = $roleQuery->get_result();
+        $role = $roleRes->fetch_assoc();
+        $role_id = $role ? $role['id'] : null;
 
-            if ($role_id) {
-                // Thêm user
-                $stmt = $conn->prepare("INSERT INTO users (userName, fullName, email, identifyCard, gender, birthDate, joinDate, unit, password, isAdmin, createdAt)
-                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-                $stmt->bind_param("sssssssssi", $userName, $fullName, $email, $identifyCard, $gender, $birthDate, $joinDate, $unit, $password, $isAdmin);
-                if ($stmt->execute()) {
-                    $userId = $stmt->insert_id;
-                    $conn->query("INSERT INTO user_role (user_id, role_id, createdAt) VALUES ($userId, $role_id, NOW())");
-                    $success++;
-                } else {
-                    $fail++;
-                }
+        // ✅ Lấy unit_id từ unit_name
+        $unitQuery = $conn->prepare("SELECT id FROM organization_units WHERE unit_name=? LIMIT 1");
+        $unitQuery->bind_param("s", $unit_name);
+        $unitQuery->execute();
+        $unitRes = $unitQuery->get_result();
+        $unit = $unitRes->fetch_assoc();
+        $unit_id = $unit ? $unit['id'] : null;
+
+        if (!$unit_id) {
+            $missingUnits[] = $unit_name;
+            $fail++;
+            continue;
+        }
+
+        if ($role_id && $unit_id) {
+            $stmt = $conn->prepare("
+                INSERT INTO users 
+                    (userName, fullName, email, identifyCard, gender, birthDate, joinDate, unit, password, isAdmin, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            ");
+            $stmt->bind_param("sssssssssi", $userName, $fullName, $email, $identifyCard, $gender, $birthDate, $joinDate, $unit_id, $password, $isAdmin);
+            if ($stmt->execute()) {
+                $userId = $stmt->insert_id;
+                $conn->query("INSERT INTO user_role (user_id, role_id, createdAt) VALUES ($userId, $role_id, NOW())");
+                $success++;
             } else {
                 $fail++;
             }
@@ -79,7 +101,12 @@ if (isset($_POST['import_confirm'])) {
         }
     }
 
-    echo "<script>alert('✅ Import hoàn tất: $success thành công, $fail lỗi!'); window.location.href='users.php';</script>";
+    // ✅ Thông báo kết quả
+    $msg = "✅ Import hoàn tất: $success thành công, $fail lỗi.";
+    if (!empty($missingUnits)) $msg .= "\\n⚠️ Đơn vị chưa tồn tại: " . implode(", ", array_unique($missingUnits));
+    if (!empty($existingUsers)) $msg .= "\\n⚠️ Người dùng trùng email/CCCD: " . implode(", ", $existingUsers);
+
+    echo "<script>alert('$msg'); window.location.href='users.php';</script>";
     exit();
 }
 ?>
@@ -102,13 +129,13 @@ if (isset($_POST['import_confirm'])) {
   </form>
 
   <?php if (!empty($previewData)): ?>
-    <h3>🔍 Bản xem trước:</h3>
+    <h3>🔍 Bản xem trước dữ liệu:</h3>
     <form method="POST">
       <input type="hidden" name="data" value='<?= json_encode($previewData) ?>'>
       <table class="table">
         <thead>
           <tr>
-            <th>Tên đăng nhập</th><th>Họ tên</th><th>Email</th><th>Mã SV/CCCD</th>
+            <th>Tên đăng nhập</th><th>Họ tên</th><th>Email</th><th>CCCD/MSV</th>
             <th>Giới tính</th><th>Ngày sinh</th><th>Ngày vào Đoàn</th>
             <th>Đơn vị</th><th>Mật khẩu</th><th>Vai trò</th><th>Admin</th>
           </tr>
@@ -116,7 +143,7 @@ if (isset($_POST['import_confirm'])) {
         <tbody>
           <?php foreach ($previewData as $row): ?>
             <tr>
-              <?php for ($i = 0; $i < 11; $i++): ?>
+              <?php for ($i = 0; $i < count($row); $i++): ?>
                 <td><?= htmlspecialchars($row[$i]) ?></td>
               <?php endfor; ?>
             </tr>
