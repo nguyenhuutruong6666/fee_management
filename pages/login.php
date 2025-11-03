@@ -28,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result && $result->num_rows > 0) {
         $user = $result->fetch_assoc();
 
-        // So sánh mật khẩu (plain text – có thể nâng cấp thành password_verify)
+        // So sánh mật khẩu
         if ($password === $user['password']) {
             
-            // ưu thông tin session đầy đủ
+            // lưu thông tin session đầy đủ
             $_SESSION['user'] = [
                 'userId' => $user['userId'],
                 'userName' => $user['userName'],

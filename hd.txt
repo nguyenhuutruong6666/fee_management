@@ -7,25 +7,18 @@ C:\xampp\htdocs\fee_management\
 │   ├── header.php
 │   ├── navbar.php
 │   ├── footer.php
-│
+│   ├── PHPMailer/
+│       ├── src/
+│           ├── PHPMailer.php
+│           ├── SMTP.php
+│           └── Exception.php
 ├── pages/
 │   ├── login.php
 │   ├── logout.php
 │   ├── dashboard.php
 │   ├── users.php
-│   ├── fee_policy.php
-│   ├── obligations.php
-│   ├── payments.php
-│   ├── activities.php
-│   ├── reports.php
 │   ├── forgot_password.php
-│   ├── change_password.php
-│   ├── units.php
-│   ├── proposals.php
-│   ├── approval.php
-│   ├── settlement.php
-│   ├── reminders.php
-│   └── settings.php
+│   └── change_password.php
 │
 ├── public/
 │   ├── css/style.css
