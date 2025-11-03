@@ -71,7 +71,7 @@ $result = $conn->query($sql);
             <td><?= htmlspecialchars($row['unit_name'] ?? 'Chưa cập nhật') ?></td>
             <td><?= htmlspecialchars($row['role_name'] ?? 'Chưa gán') ?></td>
             <td class="actions-cell">
-              <a href="edit_user.php?id=<?= $row['userId'] ?>" class="btn-edit" title="Sửa">✏️</a>
+              <a href="edit_user2.php?id=<?= $row['userId'] ?>" class="btn-edit" title="Sửa">✏️</a>
               <a href="delete_user.php?id=<?= $row['userId'] ?>" class="btn-delete" 
                  onclick="return confirm('Bạn có chắc muốn xóa người dùng này không?');" title="Xóa">🗑️</a>
             </td>
