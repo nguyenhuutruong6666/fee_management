@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ========== CHỈ QUẢN TRỊ VIÊN MỚI CÓ QUYỀN ==========
+//CHỈ QUẢN TRỊ VIÊN MỚI CÓ QUYỀN
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
@@ -13,9 +13,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
 
 $message = "";
 
-/* =======================================================
-   🗑️ XÓA CHÍNH SÁCH
-======================================================= */
+//XÓA CHÍNH SÁCH
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_id'])) {
   $deleteId = intval($_POST['delete_id']);
 
@@ -44,9 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_id'])) {
   }
 }
 
-/* =======================================================
-   ⚡ KÍCH HOẠT CHÍNH SÁCH (chỉ 1 Active toàn hệ thống)
-======================================================= */
+//KÍCH HOẠT CHÍNH SÁCH (chỉ 1 Active toàn hệ thống)
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['activate_id'])) {
   $activateId = intval($_POST['activate_id']);
 
@@ -65,9 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['activate_id'])) {
   }
 }
 
-/* =======================================================
-   🔄 HỦY KÍCH HOẠT (CHUYỂN VỀ NHÁP)
-======================================================= */
+//HỦY KÍCH HOẠT (CHUYỂN VỀ NHÁP)
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['deactivate_id'])) {
   $deactivateId = intval($_POST['deactivate_id']);
 
@@ -81,9 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['deactivate_id'])) {
   }
 }
 
-/* =======================================================
-   📋 LẤY DANH SÁCH CHÍNH SÁCH + HẠN NỘP ĐẾN
-======================================================= */
+//LẤY DANH SÁCH CHÍNH SÁCH + HẠN NỘP ĐẾN
 $sql = "
   SELECT 
     p.id,

@@ -1,0 +1,122 @@
+userName,fullName,email,identifyCard,gender,birthDate,joinDate,unit_name,password,role_name,isAdmin
+admin,Administrator,admin@doan.org,100000001,M,1975-06-06,2000-06-06,Trường Đại học Sư phạm Hà Nội,123456,Quản trị viên,1
+bchtruong1,BCH Truong 1,bchtruong1@doan.org,100000002,F,1979-02-14,2001-01-05,Trường Đại học Sư phạm Hà Nội,123456,BCH Trường,0
+bchtruong2,BCH Truong 2,bchtruong2@doan.org,100000003,M,1980-08-20,2002-03-10,Trường Đại học Sư phạm Hà Nội,123456,BCH Trường,0
+bchtruong3,BCH Truong 3,bchtruong3@doan.org,100000004,F,1982-11-11,2003-05-15,Trường Đại học Sư phạm Hà Nội,123456,BCH Trường,0
+bchtruong4,BCH Truong 4,bchtruong4@doan.org,100000005,M,1976-04-04,1999-09-01,Trường Đại học Sư phạm Hà Nội,123456,BCH Trường,0
+kcntt_01,Truong Khoa CNTT 1,kcntt01@hnue.edu.vn,100000006,M,1978-05-12,2010-03-01,Khoa CNTT,123456,BCH Khoa,0
+kcntt_02,Truong Khoa CNTT 2,kcntt02@hnue.edu.vn,100000007,F,1981-09-09,2011-04-10,Khoa CNTT,123456,BCH Khoa,0
+kcntt_03,Truong Khoa CNTT 3,kcntt03@hnue.edu.vn,100000008,M,1975-12-12,2009-07-20,Khoa CNTT,123456,BCH Khoa,0
+kcntt_04,Truong Khoa CNTT 4,kcntt04@hnue.edu.vn,100000009,F,1983-03-03,2012-02-28,Khoa CNTT,123456,BCH Khoa,0
+ktoantin_01,Truong Khoa Toan-Tin 1,ktoantin01@hnue.edu.vn,100000010,M,1979-06-06,2008-09-01,Khoa Toán - Tin,123456,BCH Khoa,0
+ktoantin_02,Truong Khoa Toan-Tin 2,ktoantin02@hnue.edu.vn,100000011,F,1980-10-10,2009-10-10,Khoa Toán - Tin,123456,BCH Khoa,0
+ktoantin_03,Truong Khoa Toan-Tin 3,ktoantin03@hnue.edu.vn,100000012,M,1976-01-05,2007-05-05,Khoa Toán - Tin,123456,BCH Khoa,0
+ktoantin_04,Truong Khoa Toan-Tin 4,ktoantin04@hnue.edu.vn,100000013,F,1984-12-12,2013-11-11,Khoa Toán - Tin,123456,BCH Khoa,0
+knguvan_01,Truong Khoa Ngu Van 1,knguvan01@hnue.edu.vn,100000014,F,1982-07-07,2006-08-08,Khoa Ngữ Văn,123456,BCH Khoa,0
+knguvan_02,Truong Khoa Ngu Van 2,knguvan02@hnue.edu.vn,100000015,M,1977-09-09,2005-04-04,Khoa Ngữ Văn,123456,BCH Khoa,0
+knguvan_03,Truong Khoa Ngu Van 3,knguvan03@hnue.edu.vn,100000016,F,1985-01-20,2014-01-20,Khoa Ngữ Văn,123456,BCH Khoa,0
+knguvan_04,Truong Khoa Ngu Van 4,knguvan04@hnue.edu.vn,100000017,M,1974-02-02,2003-03-03,Khoa Ngữ Văn,123456,BCH Khoa,0
+bch_cd_k72e1_1,BCH CD K72E1 - 1,bchk72e1_1@doan.org,100000018,F,1990-02-02,2015-05-10,Chi đoàn K72E1,123456,BCH Chi đoàn,0
+bch_cd_k72e1_2,BCH CD K72E1 - 2,bchk72e1_2@doan.org,100000019,M,1991-03-03,2016-06-11,Chi đoàn K72E1,123456,BCH Chi đoàn,0
+bch_cd_k72e1_3,BCH CD K72E1 - 3,bchk72e1_3@doan.org,100000020,F,1992-04-04,2017-07-12,Chi đoàn K72E1,123456,BCH Chi đoàn,0
+bch_cd_k72e1_4,BCH CD K72E1 - 4,bchk72e1_4@doan.org,100000021,M,1989-05-05,2014-08-13,Chi đoàn K72E1,123456,BCH Chi đoàn,0
+bch_cd_k72e2_1,BCH CD K72E2 - 1,bchk72e2_1@doan.org,100000022,M,1990-06-06,2015-09-14,Chi đoàn K72E2,123456,BCH Chi đoàn,0
+bch_cd_k72e2_2,BCH CD K72E2 - 2,bchk72e2_2@doan.org,100000023,F,1991-07-07,2016-10-15,Chi đoàn K72E2,123456,BCH Chi đoàn,0
+bch_cd_k72e2_3,BCH CD K72E2 - 3,bchk72e2_3@doan.org,100000024,M,1992-08-08,2017-11-16,Chi đoàn K72E2,123456,BCH Chi đoàn,0
+bch_cd_k72e2_4,BCH CD K72E2 - 4,bchk72e2_4@doan.org,100000025,F,1988-09-09,2014-12-17,Chi đoàn K72E2,123456,BCH Chi đoàn,0
+bch_cd_k72e3_1,BCH CD K72E3 - 1,bchk72e3_1@doan.org,100000026,F,1990-10-10,2015-01-18,Chi đoàn K72E3,123456,BCH Chi đoàn,0
+bch_cd_k72e3_2,BCH CD K72E3 - 2,bchk72e3_2@doan.org,100000027,M,1991-11-11,2016-02-19,Chi đoàn K72E3,123456,BCH Chi đoàn,0
+bch_cd_k72e3_3,BCH CD K72E3 - 3,bchk72e3_3@doan.org,100000028,F,1992-12-12,2017-03-20,Chi đoàn K72E3,123456,BCH Chi đoàn,0
+bch_cd_k72e3_4,BCH CD K72E3 - 4,bchk72e3_4@doan.org,100000029,M,1989-01-01,2014-04-21,Chi đoàn K72E3,123456,BCH Chi đoàn,0
+bch_cd_k72e4_1,BCH CD K72E4 - 1,bchk72e4_1@doan.org,100000030,M,1990-02-02,2015-05-22,Chi đoàn K72E4,123456,BCH Chi đoàn,0
+bch_cd_k72e4_2,BCH CD K72E4 - 2,bchk72e4_2@doan.org,100000031,F,1991-03-03,2016-06-23,Chi đoàn K72E4,123456,BCH Chi đoàn,0
+bch_cd_k72e4_3,BCH CD K72E4 - 3,bchk72e4_3@doan.org,100000032,M,1992-04-04,2017-07-24,Chi đoàn K72E4,123456,BCH Chi đoàn,0
+bch_cd_k72e4_4,BCH CD K72E4 - 4,bchk72e4_4@doan.org,100000033,F,1989-05-05,2014-08-25,Chi đoàn K72E4,123456,BCH Chi đoàn,0
+bch_cd_k72a1_1,BCH CD K72A1 - 1,bchk72a1_1@doan.org,100000034,F,1990-06-06,2015-09-26,Chi đoàn K72A1,123456,BCH Chi đoàn,0
+bch_cd_k72a1_2,BCH CD K72A1 - 2,bchk72a1_2@doan.org,100000035,M,1991-07-07,2016-10-27,Chi đoàn K72A1,123456,BCH Chi đoàn,0
+bch_cd_k72a1_3,BCH CD K72A1 - 3,bchk72a1_3@doan.org,100000036,F,1992-08-08,2017-11-28,Chi đoàn K72A1,123456,BCH Chi đoàn,0
+bch_cd_k72a1_4,BCH CD K72A1 - 4,bchk72a1_4@doan.org,100000037,M,1988-09-09,2014-12-29,Chi đoàn K72A1,123456,BCH Chi đoàn,0
+bch_cd_k72a2_1,BCH CD K72A2 - 1,bchk72a2_1@doan.org,100000038,M,1990-10-10,2015-01-30,Chi đoàn K72A2,123456,BCH Chi đoàn,0
+bch_cd_k72a2_2,BCH CD K72A2 - 2,bchk72a2_2@doan.org,100000039,F,1991-11-11,2016-02-29,Chi đoàn K72A2,123456,BCH Chi đoàn,0
+bch_cd_k72a2_3,BCH CD K72A2 - 3,bchk72a2_3@doan.org,100000040,M,1992-12-12,2017-03-31,Chi đoàn K72A2,123456,BCH Chi đoàn,0
+bch_cd_k72a2_4,BCH CD K72A2 - 4,bchk72a2_4@doan.org,100000041,F,1989-01-01,2014-04-01,Chi đoàn K72A2,123456,BCH Chi đoàn,0
+bch_cd_k72a3_1,BCH CD K72A3 - 1,bchk72a3_1@doan.org,100000042,F,1990-02-02,2015-05-02,Chi đoàn K72A3,123456,BCH Chi đoàn,0
+bch_cd_k72a3_2,BCH CD K72A3 - 2,bchk72a3_2@doan.org,100000043,M,1991-03-03,2016-06-03,Chi đoàn K72A3,123456,BCH Chi đoàn,0
+bch_cd_k72a3_3,BCH CD K72A3 - 3,bchk72a3_3@doan.org,100000044,F,1992-04-04,2017-07-04,Chi đoàn K72A3,123456,BCH Chi đoàn,0
+bch_cd_k72a3_4,BCH CD K72A3 - 4,bchk72a3_4@doan.org,100000045,M,1989-05-05,2014-08-05,Chi đoàn K72A3,123456,BCH Chi đoàn,0
+bch_cd_k72a4_1,BCH CD K72A4 - 1,bchk72a4_1@doan.org,100000046,M,1990-06-06,2015-09-06,Chi đoàn K72A4,123456,BCH Chi đoàn,0
+bch_cd_k72a4_2,BCH CD K72A4 - 2,bchk72a4_2@doan.org,100000047,F,1991-07-07,2016-10-06,Chi đoàn K72A4,123456,BCH Chi đoàn,0
+bch_cd_k72a4_3,BCH CD K72A4 - 3,bchk72a4_3@doan.org,100000048,M,1992-08-08,2017-11-06,Chi đoàn K72A4,123456,BCH Chi đoàn,0
+bch_cd_k72a4_4,BCH CD K72A4 - 4,bchk72a4_4@doan.org,100000049,F,1988-09-09,2014-12-06,Chi đoàn K72A4,123456,BCH Chi đoàn,0
+bch_cd_k72b1_1,BCH CD K72B1 - 1,bchk72b1_1@doan.org,100000050,F,1990-10-10,2015-01-05,Chi đoàn K72B1,123456,BCH Chi đoàn,0
+bch_cd_k72b1_2,BCH CD K72B1 - 2,bchk72b1_2@doan.org,100000051,M,1991-11-11,2016-02-06,Chi đoàn K72B1,123456,BCH Chi đoàn,0
+bch_cd_k72b1_3,BCH CD K72B1 - 3,bchk72b1_3@doan.org,100000052,F,1992-12-12,2017-03-07,Chi đoàn K72B1,123456,BCH Chi đoàn,0
+bch_cd_k72b1_4,BCH CD K72B1 - 4,bchk72b1_4@doan.org,100000053,M,1989-01-01,2014-04-08,Chi đoàn K72B1,123456,BCH Chi đoàn,0
+bch_cd_k72b2_1,BCH CD K72B2 - 1,bchk72b2_1@doan.org,100000054,M,1990-02-02,2015-05-09,Chi đoàn K72B2,123456,BCH Chi đoàn,0
+bch_cd_k72b2_2,BCH CD K72B2 - 2,bchk72b2_2@doan.org,100000055,F,1991-03-03,2016-06-10,Chi đoàn K72B2,123456,BCH Chi đoàn,0
+bch_cd_k72b2_3,BCH CD K72B2 - 3,bchk72b2_3@doan.org,100000056,M,1992-04-04,2017-07-11,Chi đoàn K72B2,123456,BCH Chi đoàn,0
+bch_cd_k72b2_4,BCH CD K72B2 - 4,bchk72b2_4@doan.org,100000057,F,1989-05-05,2014-08-12,Chi đoàn K72B2,123456,BCH Chi đoàn,0
+bch_cd_k72b3_1,BCH CD K72B3 - 1,bchk72b3_1@doan.org,100000058,F,1990-06-06,2015-09-13,Chi đoàn K72B3,123456,BCH Chi đoàn,0
+bch_cd_k72b3_2,BCH CD K72B3 - 2,bchk72b3_2@doan.org,100000059,M,1991-07-07,2016-10-14,Chi đoàn K72B3,123456,BCH Chi đoàn,0
+bch_cd_k72b3_3,BCH CD K72B3 - 3,bchk72b3_3@doan.org,100000060,F,1992-08-08,2017-11-15,Chi đoàn K72B3,123456,BCH Chi đoàn,0
+bch_cd_k72b3_4,BCH CD K72B3 - 4,bchk72b3_4@doan.org,100000061,M,1989-09-09,2014-12-16,Chi đoàn K72B3,123456,BCH Chi đoàn,0
+sv_k72e1_01,Nguyen Van E1,sv_k72e1_01@hnue.edu.vn,100000062,M,2000-01-10,2019-09-01,Chi đoàn K72E1,123456,Đoàn viên,0
+sv_k72e1_02,Tran Thi E2,sv_k72e1_02@hnue.edu.vn,100000063,F,2000-02-11,2019-09-02,Chi đoàn K72E1,123456,Đoàn viên,0
+sv_k72e1_03,Le Van E3,sv_k72e1_03@hnue.edu.vn,100000064,M,2000-03-12,2019-09-03,Chi đoàn K72E1,123456,Đoàn viên,0
+sv_k72e1_04,Pham Thi E4,sv_k72e1_04@hnue.edu.vn,100000065,F,2000-04-13,2019-09-04,Chi đoàn K72E1,123456,Đoàn viên,0
+sv_k72e1_05,Hoang Van E5,sv_k72e1_05@hnue.edu.vn,100000066,M,2000-05-14,2019-09-05,Chi đoàn K72E1,123456,Đoàn viên,0
+sv_k72e2_01,Nguyen Van F1,sv_k72e2_01@hnue.edu.vn,100000067,M,2000-06-15,2019-09-06,Chi đoàn K72E2,123456,Đoàn viên,0
+sv_k72e2_02,Tran Thi F2,sv_k72e2_02@hnue.edu.vn,100000068,F,2000-07-16,2019-09-07,Chi đoàn K72E2,123456,Đoàn viên,0
+sv_k72e2_03,Le Van F3,sv_k72e2_03@hnue.edu.vn,100000069,M,2000-08-17,2019-09-08,Chi đoàn K72E2,123456,Đoàn viên,0
+sv_k72e2_04,Pham Thi F4,sv_k72e2_04@hnue.edu.vn,100000070,F,2000-09-18,2019-09-09,Chi đoàn K72E2,123456,Đoàn viên,0
+sv_k72e2_05,Hoang Van F5,sv_k72e2_05@hnue.edu.vn,100000071,M,2000-10-19,2019-09-10,Chi đoàn K72E2,123456,Đoàn viên,0
+sv_k72e3_01,Nguyen Van G1,sv_k72e3_01@hnue.edu.vn,100000072,M,2000-11-20,2019-09-11,Chi đoàn K72E3,123456,Đoàn viên,0
+sv_k72e3_02,Tran Thi G2,sv_k72e3_02@hnue.edu.vn,100000073,F,2000-12-21,2019-09-12,Chi đoàn K72E3,123456,Đoàn viên,0
+sv_k72e3_03,Le Van G3,sv_k72e3_03@hnue.edu.vn,100000074,M,2001-01-22,2020-02-01,Chi đoàn K72E3,123456,Đoàn viên,0
+sv_k72e3_04,Pham Thi G4,sv_k72e3_04@hnue.edu.vn,100000075,F,2001-02-23,2020-02-02,Chi đoàn K72E3,123456,Đoàn viên,0
+sv_k72e3_05,Hoang Van G5,sv_k72e3_05@hnue.edu.vn,100000076,M,2001-03-24,2020-02-03,Chi đoàn K72E3,123456,Đoàn viên,0
+sv_k72e4_01,Nguyen Van H1,sv_k72e4_01@hnue.edu.vn,100000077,M,2001-04-25,2020-02-04,Chi đoàn K72E4,123456,Đoàn viên,0
+sv_k72e4_02,Tran Thi H2,sv_k72e4_02@hnue.edu.vn,100000078,F,2001-05-26,2020-02-05,Chi đoàn K72E4,123456,Đoàn viên,0
+sv_k72e4_03,Le Van H3,sv_k72e4_03@hnue.edu.vn,100000079,M,2001-06-27,2020-02-06,Chi đoàn K72E4,123456,Đoàn viên,0
+sv_k72e4_04,Pham Thi H4,sv_k72e4_04@hnue.edu.vn,100000080,F,2001-07-28,2020-02-07,Chi đoàn K72E4,123456,Đoàn viên,0
+sv_k72e4_05,Hoang Van H5,sv_k72e4_05@hnue.edu.vn,100000081,M,2001-08-29,2020-02-08,Chi đoàn K72E4,123456,Đoàn viên,0
+sv_k72a1_01,Nguyen Van A1,sv_k72a1_01@hnue.edu.vn,100000082,M,2001-09-30,2020-03-01,Chi đoàn K72A1,123456,Đoàn viên,0
+sv_k72a1_02,Tran Thi A2,sv_k72a1_02@hnue.edu.vn,100000083,F,2001-10-01,2020-03-02,Chi đoàn K72A1,123456,Đoàn viên,0
+sv_k72a1_03,Le Van A3,sv_k72a1_03@hnue.edu.vn,100000084,M,2001-11-02,2020-03-03,Chi đoàn K72A1,123456,Đoàn viên,0
+sv_k72a1_04,Pham Thi A4,sv_k72a1_04@hnue.edu.vn,100000085,F,2001-12-03,2020-03-04,Chi đoàn K72A1,123456,Đoàn viên,0
+sv_k72a1_05,Hoang Van A5,sv_k72a1_05@hnue.edu.vn,100000086,M,2002-01-04,2020-03-05,Chi đoàn K72A1,123456,Đoàn viên,0
+sv_k72a2_01,Nguyen Van B1,sv_k72a2_01@hnue.edu.vn,100000087,M,2002-02-05,2020-03-06,Chi đoàn K72A2,123456,Đoàn viên,0
+sv_k72a2_02,Tran Thi B2,sv_k72a2_02@hnue.edu.vn,100000088,F,2002-03-06,2020-03-07,Chi đoàn K72A2,123456,Đoàn viên,0
+sv_k72a2_03,Le Van B3,sv_k72a2_03@hnue.edu.vn,100000089,M,2002-04-07,2020-03-08,Chi đoàn K72A2,123456,Đoàn viên,0
+sv_k72a2_04,Pham Thi B4,sv_k72a2_04@hnue.edu.vn,100000090,F,2002-05-08,2020-03-09,Chi đoàn K72A2,123456,Đoàn viên,0
+sv_k72a2_05,Hoang Van B5,sv_k72a2_05@hnue.edu.vn,100000091,M,2002-06-09,2020-03-10,Chi đoàn K72A2,123456,Đoàn viên,0
+sv_k72a3_01,Nguyen Van C1,sv_k72a3_01@hnue.edu.vn,100000092,M,2002-07-10,2020-03-11,Chi đoàn K72A3,123456,Đoàn viên,0
+sv_k72a3_02,Tran Thi C2,sv_k72a3_02@hnue.edu.vn,100000093,F,2002-08-11,2020-03-12,Chi đoàn K72A3,123456,Đoàn viên,0
+sv_k72a3_03,Le Van C3,sv_k72a3_03@hnue.edu.vn,100000094,M,2002-09-12,2020-03-13,Chi đoàn K72A3,123456,Đoàn viên,0
+sv_k72a3_04,Pham Thi C4,sv_k72a3_04@hnue.edu.vn,100000095,F,2002-10-13,2020-03-14,Chi đoàn K72A3,123456,Đoàn viên,0
+sv_k72a3_05,Hoang Van C5,sv_k72a3_05@hnue.edu.vn,100000096,M,2002-11-14,2020-03-15,Chi đoàn K72A3,123456,Đoàn viên,0
+sv_k72a4_01,Nguyen Van D1,sv_k72a4_01@hnue.edu.vn,100000097,M,2002-12-15,2020-03-16,Chi đoàn K72A4,123456,Đoàn viên,0
+sv_k72a4_02,Tran Thi D2,sv_k72a4_02@hnue.edu.vn,100000098,F,2003-01-16,2020-03-17,Chi đoàn K72A4,123456,Đoàn viên,0
+sv_k72a4_03,Le Van D3,sv_k72a4_03@hnue.edu.vn,100000099,M,2003-02-17,2020-03-18,Chi đoàn K72A4,123456,Đoàn viên,0
+sv_k72a4_04,Pham Thi D4,sv_k72a4_04@hnue.edu.vn,100000100,F,2003-03-18,2020-03-19,Chi đoàn K72A4,123456,Đoàn viên,0
+sv_k72a4_05,Hoang Van D5,sv_k72a4_05@hnue.edu.vn,100000101,M,2003-04-19,2020-03-20,Chi đoàn K72A4,123456,Đoàn viên,0
+sv_k72b1_01,Nguyen Van B1-1,sv_k72b1_01@hnue.edu.vn,100000102,M,2001-05-20,2019-10-01,Chi đoàn K72B1,123456,Đoàn viên,0
+sv_k72b1_02,Tran Thi B1-2,sv_k72b1_02@hnue.edu.vn,100000103,F,2001-06-21,2019-10-02,Chi đoàn K72B1,123456,Đoàn viên,0
+sv_k72b1_03,Le Van B1-3,sv_k72b1_03@hnue.edu.vn,100000104,M,2001-07-22,2019-10-03,Chi đoàn K72B1,123456,Đoàn viên,0
+sv_k72b1_04,Pham Thi B1-4,sv_k72b1_04@hnue.edu.vn,100000105,F,2001-08-23,2019-10-04,Chi đoàn K72B1,123456,Đoàn viên,0
+sv_k72b1_05,Hoang Van B1-5,sv_k72b1_05@hnue.edu.vn,100000106,M,2001-09-24,2019-10-05,Chi đoàn K72B1,123456,Đoàn viên,0
+sv_k72b2_01,Nguyen Van B2-1,sv_k72b2_01@hnue.edu.vn,100000107,M,2001-10-25,2019-10-06,Chi đoàn K72B2,123456,Đoàn viên,0
+sv_k72b2_02,Tran Thi B2-2,sv_k72b2_02@hnue.edu.vn,100000108,F,2001-11-26,2019-10-07,Chi đoàn K72B2,123456,Đoàn viên,0
+sv_k72b2_03,Le Van B2-3,sv_k72b2_03@hnue.edu.vn,100000109,M,2001-12-27,2019-10-08,Chi đoàn K72B2,123456,Đoàn viên,0
+sv_k72b2_04,Pham Thi B2-4,sv_k72b2_04@hnue.edu.vn,100000110,F,2002-01-28,2019-10-09,Chi đoàn K72B2,123456,Đoàn viên,0
+sv_k72b2_05,Hoang Van B2-5,sv_k72b2_05@hnue.edu.vn,100000111,M,2002-02-28,2019-10-10,Chi đoàn K72B2,123456,Đoàn viên,0
+sv_k72b3_01,Nguyen Van B3-1,sv_k72b3_01@hnue.edu.vn,100000112,M,2002-03-29,2019-10-11,Chi đoàn K72B3,123456,Đoàn viên,0
+sv_k72b3_02,Tran Thi B3-2,sv_k72b3_02@hnue.edu.vn,100000113,F,2002-04-30,2019-10-12,Chi đoàn K72B3,123456,Đoàn viên,0
+sv_k72b3_03,Le Van B3-3,sv_k72b3_03@hnue.edu.vn,100000114,M,2002-05-31,2019-10-13,Chi đoàn K72B3,123456,Đoàn viên,0
+sv_k72b3_04,Pham Thi B3-4,sv_k72b3_04@hnue.edu.vn,100000115,F,2002-06-01,2019-10-14,Chi đoàn K72B3,123456,Đoàn viên,0
+sv_k72b3_05,Hoang Van B3-5,sv_k72b3_05@hnue.edu.vn,100000116,M,2002-07-02,2019-10-15,Chi đoàn K72B3,123456,Đoàn viên,0
+sv_k72b4_01,Nguyen Van B4-1,sv_k72b4_01@hnue.edu.vn,100000117,M,2002-08-03,2019-10-16,Chi đoàn K72B4,123456,Đoàn viên,0
+sv_k72b4_02,Tran Thi B4-2,sv_k72b4_02@hnue.edu.vn,100000118,F,2002-09-04,2019-10-17,Chi đoàn K72B4,123456,Đoàn viên,0
+sv_k72b4_03,Le Van B4-3,sv_k72b4_03@hnue.edu.vn,100000119,M,2002-10-05,2019-10-18,Chi đoàn K72B4,123456,Đoàn viên,0
+sv_k72b4_04,Pham Thi B4-4,sv_k72b4_04@hnue.edu.vn,100000120,F,2002-11-06,2019-10-19,Chi đoàn K72B4,123456,Đoàn viên,0
+sv_k72b4_05,Hoang Van B4-5,sv_k72b4_05@hnue.edu.vn,100000121,M,2002-12-07,2019-10-20,Chi đoàn K72B4,123456,Đoàn viên,0

@@ -58,8 +58,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       if ($users->num_rows == 0) {
         $message = "<p class='error'>⚠️ Không có đoàn viên nào trong hệ thống.</p>";
       } else {
-        $due_date = date('Y-m-d', strtotime("+{$policy['due_day']} days"));
+        //Tính hạn nộp theo cấu trúc mới
+        if (!empty($policy['due_date'])) {
+          $due_date = $policy['due_date'];
+        } else {
+          $today = date('Y-m-d');
+          switch ($policy['cycle']) {
+            case 'Tháng':
+              // hạn là ngày 15 của tháng hiện tại
+              $due_date = date('Y-m-15');
+              break;
+            case 'Học kỳ':
+              // Nếu tháng <= 6 -> HK2 (15/04), ngược lại HK1 (15/12)
+              $month = date('n');
+              $year = date('Y');
+              $due_date = ($month <= 6) ? "$year-04-15" : "$year-12-15";
+              break;
+            case 'Năm':
+              // Hạn cố định 15/12 của năm hiện tại
+              $due_date = date('Y-12-15');
+              break;
+            default:
+              $due_date = date('Y-m-d', strtotime("+15 days"));
+              break;
+          }
+        }
 
+        //Tạo nghĩa vụ đoàn phí cho từng đoàn viên
         while ($u = $users->fetch_assoc()) {
           $amount = floatval($policy['standard_amount']);
           $role = $u['role_name'] ?? 'Đoàn viên';
@@ -95,7 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           }
         }
 
-        // Ghi log
+        //Ghi log quá trình
         $end_time = microtime(true);
         $runtime = round($end_time - $start_time, 2);
 

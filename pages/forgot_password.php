@@ -5,7 +5,7 @@ include("../config/db.php");
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Nếu không dùng Composer
+//Nếu không dùng Composer
 require_once("../includes/PHPMailer/src/Exception.php");
 require_once("../includes/PHPMailer/src/PHPMailer.php");
 require_once("../includes/PHPMailer/src/SMTP.php");
@@ -13,11 +13,11 @@ require_once("../includes/PHPMailer/src/SMTP.php");
 $message = "";
 $step = 1; // 1: nhập email | 2: nhập mã xác minh | 3: nhập mật khẩu mới
 
-// ===== Hàm gửi email xác minh =====
+//Hàm gửi email xác minh
 function sendVerificationCode($toEmail, $code) {
     $mail = new PHPMailer(true);
     try {
-        // --- Cấu hình Gmail SMTP ---
+        //Cấu hình Gmail SMTP
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
@@ -26,11 +26,11 @@ function sendVerificationCode($toEmail, $code) {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
-        // --- Thông tin người gửi / người nhận ---
+        //Thông tin người gửi / người nhận
         $mail->setFrom('nguyenhuutruongchatgpt@gmail.com', 'He thong Quan ly Doan phi');
         $mail->addAddress($toEmail);
 
-        // --- Nội dung email ---
+        //Nội dung email
         $mail->isHTML(true);
         $mail->Subject = 'Mã xác minh đặt lại mật khẩu';
         $mail->Body = "

@@ -11,9 +11,11 @@ if (!isset($_SESSION['user'])) {
 
 $user = $_SESSION['user'];
 $role_name = $user['role_name'] ?? '';
+$user_id = $user['userId'];
+$user_unit = $user['unit'] ?? '';
 $message = "";
 
-// Kiểm tra quyền (BCH Trường, BCH Khoa, BCH Chi đoàn)
+//Chỉ BCH và Admin được phép vào
 $allowed_roles = ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'];
 if (!in_array($role_name, $allowed_roles) && !$user['isAdmin']) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
@@ -21,58 +23,74 @@ if (!in_array($role_name, $allowed_roles) && !$user['isAdmin']) {
   exit();
 }
 
-// Cập nhật trạng thái giao dịch
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id'])) {
+
+//CẬP NHẬT TRẠNG THÁI GIAO DỊCH
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id']) && isset($_POST['status'])) {
   $payment_id = intval($_POST['payment_id']);
   $new_status = $_POST['status'];
-  $note = $_POST['note'] ?? '';
+  $note = trim($_POST['note'] ?? '');
 
-  // Lấy thông tin giao dịch
   $res = $conn->query("SELECT * FROM fee_payment WHERE id=$payment_id");
   $payment = $res->fetch_assoc();
 
-  if (!$payment) {
-    $message = "<p class='error'>❌ Không tìm thấy giao dịch.</p>";
-  } else {
-    // Cập nhật trạng thái
+  if ($payment) {
     $stmt = $conn->prepare("UPDATE fee_payment SET status=?, note=? WHERE id=?");
     $stmt->bind_param("ssi", $new_status, $note, $payment_id);
     $stmt->execute();
 
-    // Nếu trạng thái = Success → Cập nhật nghĩa vụ + sinh biên lai + ghi sổ quỹ
     if ($new_status === 'Success') {
       $obligation_id = $payment['obligation_id'];
       $amount = $payment['amount'];
 
       $conn->query("UPDATE fee_obligation SET status='Đã nộp' WHERE id=$obligation_id");
 
-      // Phát hành biên lai (e-Receipt)
+      // Sinh biên lai
       $conn->query("
         INSERT INTO fee_receipt (payment_id, receipt_code, issued_by, amount)
-        VALUES ($payment_id, CONCAT('RC-', $payment_id, '-', YEAR(NOW())), {$user['userId']}, $amount)
+        VALUES ($payment_id, CONCAT('RC-', $payment_id, '-', YEAR(NOW())), $user_id, $amount)
       ");
 
-      // Ghi nhận sổ quỹ
+      // Ghi vào sổ quỹ
       $conn->query("
         INSERT INTO fee_cashbook (payment_id, transaction_type, amount, recorded_by, description)
-        VALUES ($payment_id, 'Thu', $amount, {$user['userId']}, 'Duyệt giao dịch đoàn phí')
+        VALUES ($payment_id, 'Thu', $amount, $user_id, 'Duyệt giao dịch đoàn phí')
       ");
     }
 
-    $message = "<p class='success'>✅ Đã cập nhật trạng thái giao dịch thành công!</p>";
+    $message = "<p class='success'>✅ Cập nhật trạng thái thành công!</p>";
+  } else {
+    $message = "<p class='error'>❌ Không tìm thấy giao dịch.</p>";
   }
 }
 
-// Lấy danh sách giao dịch (Pending hoặc Need review)
+
+//LỌC DANH SÁCH GIAO DỊCH THEO QUYỀN
 $sql = "
-  SELECT p.id, p.transaction_code, p.payment_method, p.amount, p.status, p.note, p.payment_date,
-         u.fullName AS payer_name, o.period_label, o.status AS obligation_status
+  SELECT 
+    p.id, p.transaction_code, p.payment_method, p.amount, p.status, p.note, p.payment_date,
+    u.fullName AS payer_name, u.unit AS payer_unit, o.period_label, o.status AS obligation_status
   FROM fee_payment p
   JOIN users u ON p.payer_id = u.userId
   JOIN fee_obligation o ON p.obligation_id = o.id
-  WHERE p.status IN ('Pending', 'Need review')
-  ORDER BY p.payment_date DESC
+  LEFT JOIN user_role ur ON u.userId = ur.user_id
+  LEFT JOIN role r ON ur.role_id = r.id
+  WHERE 1
 ";
+
+//Admin & BCH Trường → thấy tất cả
+if (!$user['isAdmin'] && $role_name !== 'BCH Trường') {
+  //BCH Khoa → thấy đoàn viên và BCH Chi đoàn cùng khoa
+  if ($role_name === 'BCH Khoa') {
+    $sql .= " AND (u.unit LIKE '" . $conn->real_escape_string($user_unit) . "%')";
+  }
+
+  //BCH Chi đoàn → chỉ thấy đoàn viên cùng chi đoàn
+  if ($role_name === 'BCH Chi đoàn') {
+    $sql .= " AND u.unit = '" . $conn->real_escape_string($user_unit) . "'";
+  }
+}
+
+$sql .= " ORDER BY p.payment_date DESC";
 $transactions = $conn->query($sql);
 ?>
 
@@ -85,6 +103,7 @@ $transactions = $conn->query($sql);
       <tr>
         <th>Mã GD</th>
         <th>Người nộp</th>
+        <th>Đơn vị</th>
         <th>Kỳ phí</th>
         <th>Số tiền</th>
         <th>Hình thức</th>
@@ -95,17 +114,18 @@ $transactions = $conn->query($sql);
       </tr>
     </thead>
     <tbody>
-      <?php if ($transactions->num_rows > 0): ?>
+      <?php if ($transactions && $transactions->num_rows > 0): ?>
         <?php while ($t = $transactions->fetch_assoc()): ?>
           <tr>
             <td><?= htmlspecialchars($t['transaction_code']) ?></td>
             <td><?= htmlspecialchars($t['payer_name']) ?></td>
+            <td><?= htmlspecialchars($t['payer_unit'] ?? '-') ?></td>
             <td><?= htmlspecialchars($t['period_label']) ?></td>
-            <td><?= number_format($t['amount'], 0) ?>đ</td>
+            <td><?= number_format($t['amount'], 0, ',', '.') ?>đ</td>
             <td><?= htmlspecialchars($t['payment_method']) ?></td>
             <td><?= date("d/m/Y H:i", strtotime($t['payment_date'])) ?></td>
-            <td><span class="status <?= strtolower($t['status']) ?>"><?= $t['status'] ?></span></td>
-            <td><?= htmlspecialchars($t['note']) ?></td>
+            <td><span class="status <?= strtolower($t['status']) ?>"><?= htmlspecialchars($t['status']) ?></span></td>
+            <td><?= htmlspecialchars($t['note'] ?? '') ?></td>
             <td>
               <form method="POST" class="inline-form">
                 <input type="hidden" name="payment_id" value="<?= $t['id'] ?>">
@@ -116,14 +136,25 @@ $transactions = $conn->query($sql);
                   <option value="Need review">Need review</option>
                   <option value="Canceled">Canceled</option>
                 </select>
-                <input type="text" name="note" placeholder="Ghi chú..." value="<?= htmlspecialchars($t['note']) ?>">
-                <button type="submit" class="btn-update">Lưu</button>
+                <input type="text" name="note" placeholder="Ghi chú..." value="<?= htmlspecialchars($t['note'] ?? '') ?>">
+                <button type="submit" class="btn-update">💾 Lưu</button>
               </form>
+
+              <!-- Nút nhắc nợ -->
+              <?php if (in_array($t['status'], ['Pending', 'Need review'])): ?>
+                <form method="POST" class="inline-form" action="remind_member.php">
+                  <input type="hidden" name="payer_name" value="<?= htmlspecialchars($t['payer_name']) ?>">
+                  <input type="hidden" name="payer_unit" value="<?= htmlspecialchars($t['payer_unit']) ?>">
+                  <input type="hidden" name="amount" value="<?= $t['amount'] ?>">
+                  <input type="hidden" name="period_label" value="<?= htmlspecialchars($t['period_label']) ?>">
+                  <button type="submit" class="btn-remind">💬 Nhắc nợ</button>
+                </form>
+              <?php endif; ?>
             </td>
           </tr>
         <?php endwhile; ?>
       <?php else: ?>
-        <tr><td colspan="9" style="text-align:center;">Không có giao dịch cần xử lý</td></tr>
+        <tr><td colspan="10" style="text-align:center;">Không có giao dịch phù hợp.</td></tr>
       <?php endif; ?>
     </tbody>
   </table>
@@ -153,11 +184,13 @@ th, td {
 }
 th { background: #0984e3; color: white; }
 tr:nth-child(even) { background: #f9f9f9; }
+
 .inline-form {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
   justify-content: center;
+  margin-top: 5px;
 }
 .status-select, input[type=text] {
   padding: 5px;
@@ -174,12 +207,25 @@ tr:nth-child(even) { background: #f9f9f9; }
   cursor: pointer;
 }
 .btn-update:hover { background: #019875; }
+
+.btn-remind {
+  background: linear-gradient(135deg, #e67e22, #f39c12);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.btn-remind:hover {
+  background: linear-gradient(135deg, #d35400, #e67e22);
+}
+
 .status.success { color: #27ae60; font-weight: bold; }
 .status.pending { color: #e67e22; font-weight: bold; }
 .status.failed { color: #e74c3c; font-weight: bold; }
-.status["need review"] { color: #f1c40f; }
-.success { color: #27ae60; font-weight: bold; }
-.error { color: #d63031; font-weight: bold; }
+.status.needreview { color: #f1c40f; font-weight: bold; }
+.success { color: #27ae60; font-weight: bold; text-align: center; }
+.error { color: #d63031; font-weight: bold; text-align: center; }
 </style>
 
 <?php include("../includes/footer.php"); ?>

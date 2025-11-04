@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// ========== Chỉ cho phép Quản trị viên truy cập ==========
+//Chỉ cho phép Quản trị viên truy cập
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
@@ -13,7 +13,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
 
 $message = "";
 
-// ========== Xử lý khi bấm Lưu chính sách ==========
+//Xử lý khi bấm Lưu chính sách
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $policy_name = trim($_POST['policy_name'] ?? '');
   $cycle = $_POST['cycle'] ?? '';
