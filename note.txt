@@ -1,0 +1,3 @@
+nếu chọn Chu kỳ áp dụng là tháng thì Hạn nộp (Due Date) sẽ hiển thị cột chọn ngày và nó sẽ tự động tạo chu kỳ cho hàng tháng
+nếu chọn Chu kỳ áp dụng là học kỳ thì Hạn nộp (Due Date) sẽ hiển thị cột chọn ngày(15/12 và 15/04) và nó sẽ tự động tạo chu kỳ cho 2 chu kì
+nếu chọn Chu kỳ áp dụng là năm thì Hạn nộp (Due Date) sẽ hiển thị cột chọn ngày(15/12) và nó sẽ tự động tạo chu kỳ cho 4 năm học
