@@ -4,7 +4,7 @@ include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-// Kiểm tra quyền admin
+//Chỉ cho phép quản trị viên
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập chức năng này.</p></div>";
   include("../includes/footer.php");
@@ -15,29 +15,29 @@ $message = "";
 $total_success = 0;
 $total_failed = 0;
 
-// Khi admin bấm nút “Sinh nghĩa vụ”
+//Khi admin bấm “Sinh nghĩa vụ đoàn phí”
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $cycle_label = trim($_POST['cycle_label'] ?? '');
   $policy_id = intval($_POST['policy_id'] ?? 0);
   $run_by = $_SESSION['user']['userId'];
-  $start_time = microtime(true);
 
   if (empty($cycle_label) || $policy_id <= 0) {
-    $message = "<p class='error'>⚠️ Vui lòng chọn chính sách và nhập nhãn chu kỳ!</p>";
+    $message = "<p class='error'>⚠️ Vui lòng chọn chính sách và nhập nhãn chu kỳ hợp lệ!</p>";
   } else {
-    // Lấy thông tin chính sách
-    $policy_sql = "SELECT * FROM fee_policy WHERE id=? AND status='Active' LIMIT 1";
-    $stmt = $conn->prepare($policy_sql);
+    //Lấy chính sách đang kích hoạt
+    $stmt = $conn->prepare("SELECT * FROM fee_policy WHERE id=? AND status='Active' LIMIT 1");
+    if (!$stmt) die("❌ SQL Error (policy): " . $conn->error);
     $stmt->bind_param("i", $policy_id);
     $stmt->execute();
     $policy = $stmt->get_result()->fetch_assoc();
 
     if (!$policy) {
-      $message = "<p class='error'>❌ Không tìm thấy chính sách đoàn phí đang hiệu lực!</p>";
+      $message = "<p class='error'>❌ Không tìm thấy chính sách đoàn phí đang kích hoạt.</p>";
     } else {
-      // Lấy quy tắc giảm phí theo vai trò
+      //Lấy quy tắc miễn giảm
       $rules = [];
       $rquery = $conn->prepare("SELECT role_name, amount FROM fee_policy_rule WHERE policy_id=?");
+      if (!$rquery) die("❌ SQL Error (rule): " . $conn->error);
       $rquery->bind_param("i", $policy_id);
       $rquery->execute();
       $rresult = $rquery->get_result();
@@ -45,38 +45,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $rules[$r['role_name']] = floatval($r['amount']);
       }
 
-      // Lấy danh sách đoàn viên
+      //Lấy danh sách đoàn viên
       $sql_users = "
-        SELECT u.userId, u.fullName, u.identifyCard, r.role_name
+        SELECT u.userId, u.fullName, u.identifyCard, COALESCE(r.role_name, 'Đoàn viên') AS role_name
         FROM users u
         LEFT JOIN user_role ur ON u.userId = ur.user_id
         LEFT JOIN role r ON ur.role_id = r.id
         WHERE r.role_name IN ('Đoàn viên', 'BCH Trường', 'BCH Khoa', 'BCH Chi đoàn')
       ";
       $users = $conn->query($sql_users);
+      if (!$users) die("❌ SQL Error (users): " . $conn->error);
 
       if ($users->num_rows == 0) {
         $message = "<p class='error'>⚠️ Không có đoàn viên nào trong hệ thống.</p>";
       } else {
-        //Tính hạn nộp theo cấu trúc mới
+        //Tính hạn nộp theo chu kỳ
         if (!empty($policy['due_date'])) {
           $due_date = $policy['due_date'];
         } else {
-          $today = date('Y-m-d');
+          $month = date('n');
+          $year = date('Y');
           switch ($policy['cycle']) {
             case 'Tháng':
-              // hạn là ngày 15 của tháng hiện tại
               $due_date = date('Y-m-15');
               break;
             case 'Học kỳ':
-              // Nếu tháng <= 6 -> HK2 (15/04), ngược lại HK1 (15/12)
-              $month = date('n');
-              $year = date('Y');
               $due_date = ($month <= 6) ? "$year-04-15" : "$year-12-15";
               break;
             case 'Năm':
-              // Hạn cố định 15/12 của năm hiện tại
-              $due_date = date('Y-12-15');
+              $due_date = "$year-12-15";
               break;
             default:
               $due_date = date('Y-m-d', strtotime("+15 days"));
@@ -84,16 +81,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           }
         }
 
-        //Tạo nghĩa vụ đoàn phí cho từng đoàn viên
+        //Sinh nghĩa vụ cho từng đoàn viên
         while ($u = $users->fetch_assoc()) {
           $amount = floatval($policy['standard_amount']);
           $role = $u['role_name'] ?? 'Đoàn viên';
+
+          // Áp dụng quy tắc giảm
           if (isset($rules[$role])) {
             $amount = max(0, $amount - $rules[$role]);
           }
 
           // Kiểm tra trùng kỳ
           $check = $conn->prepare("SELECT id FROM fee_obligation WHERE user_id=? AND period_label=? LIMIT 1");
+          if (!$check) die("❌ SQL Error (check): " . $conn->error);
           $check->bind_param("is", $u['userId'], $cycle_label);
           $check->execute();
           $exists = $check->get_result()->num_rows > 0;
@@ -106,11 +106,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           // Sinh mã tham chiếu
           $reference = "DV-" . $u['identifyCard'] . "-" . $cycle_label;
 
-          // Tạo bản ghi nghĩa vụ
+          // Thêm bản ghi nghĩa vụ
           $insert = $conn->prepare("
             INSERT INTO fee_obligation (user_id, policy_id, period_label, amount, due_date, status, reference_code, created_at)
             VALUES (?, ?, ?, ?, ?, 'Chưa nộp', ?, NOW())
           ");
+          if (!$insert) die("❌ SQL Error (insert): " . $conn->error);
           $insert->bind_param("iisdss", $u['userId'], $policy_id, $cycle_label, $amount, $due_date, $reference);
 
           if ($insert->execute()) {
@@ -120,25 +121,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           }
         }
 
-        //Ghi log quá trình
-        $end_time = microtime(true);
-        $runtime = round($end_time - $start_time, 2);
+        //Ghi log quá trình (phù hợp cấu trúc bảng bạn cho)
+        $note = "Sinh nghĩa vụ đoàn phí kỳ $cycle_label hoàn tất: $total_success thành công, $total_failed lỗi.";
+        $log_time = date('Y-m-d H:i:s');
 
         $log = $conn->prepare("
           INSERT INTO fee_generation_log (policy_id, run_by, cycle_label, total_success, total_failed, run_time, note)
-          VALUES (?, ?, ?, ?, ?, NOW(), ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
-        $note = "Sinh nghĩa vụ đoàn phí kỳ $cycle_label hoàn tất.";
-        $log->bind_param("iisiss", $policy_id, $run_by, $cycle_label, $total_success, $total_failed, $note);
+        if (!$log) die("❌ SQL Error (log): " . $conn->error);
+        $log->bind_param("iisiiis", $policy_id, $run_by, $cycle_label, $total_success, $total_failed, $log_time, $note);
         $log->execute();
 
-        $message = "<p class='success'>✅ Hoàn tất: $total_success thành công, $total_failed lỗi. (Thời gian: {$runtime}s)</p>";
+        $message = "<p class='success'>✅ Sinh nghĩa vụ đoàn phí thành công!<br>
+        ✔️ $total_success thành công — ⚠️ $total_failed lỗi<br>
+        🕒 Ghi log: $log_time</p>";
       }
     }
   }
 }
 
-// Lấy danh sách chính sách khả dụng
+//Lấy danh sách chính sách đang kích hoạt
 $policies = $conn->query("SELECT id, policy_name, cycle, standard_amount FROM fee_policy WHERE status='Active'");
 ?>
 
@@ -151,9 +154,9 @@ $policies = $conn->query("SELECT id, policy_name, cycle, standard_amount FROM fe
       <label>Chọn chính sách đoàn phí:</label>
       <select name="policy_id" required>
         <option value="">-- Chọn chính sách --</option>
-        <?php while ($p = $policies->fetch_assoc()): ?>
-          <option value="<?= $p['id'] ?>">
-            <?= htmlspecialchars($p['policy_name']) ?> (<?= $p['cycle'] ?> - <?= number_format($p['standard_amount'], 0) ?>đ)
+        <?php while ($p = $policies && $p_row = $policies->fetch_assoc()): ?>
+          <option value="<?= $p_row['id'] ?>">
+            <?= htmlspecialchars($p_row['policy_name']) ?> (<?= $p_row['cycle'] ?> - <?= number_format($p_row['standard_amount'], 0, ',', '.') ?>đ)
           </option>
         <?php endwhile; ?>
       </select>
@@ -161,7 +164,7 @@ $policies = $conn->query("SELECT id, policy_name, cycle, standard_amount FROM fe
 
     <div class="form-group">
       <label>Nhập nhãn chu kỳ (VD: 01/2025):</label>
-      <input type="text" name="cycle_label" placeholder="VD: 01/2025" required>
+      <input type="text" name="cycle_label" placeholder="VD: 01/2025 hoặc HK1/2025" required>
     </div>
 
     <div class="form-actions">
@@ -216,8 +219,8 @@ input, select {
   text-decoration: none;
   border-radius: 8px;
 }
-.error { color: #d63031; font-weight: bold; }
-.success { color: #27ae60; font-weight: bold; }
+.error { color: #d63031; font-weight: bold; text-align:center; }
+.success { color: #27ae60; font-weight: bold; text-align:center; }
 </style>
 
 <?php include("../includes/footer.php"); ?>

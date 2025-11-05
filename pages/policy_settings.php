@@ -1,10 +1,10 @@
-<?php 
+<?php  
 session_start();
 include("../includes/header.php");
 include("../includes/navbar.php");
 include("../config/db.php");
 
-//Chỉ cho phép Quản trị viên truy cập
+//Chỉ quản trị viên mới được truy cập
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
   echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
@@ -13,33 +13,45 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
 
 $message = "";
 
-//Xử lý khi bấm Lưu chính sách
+//XỬ LÝ LƯU CHÍNH SÁCH
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $policy_name = trim($_POST['policy_name'] ?? '');
   $cycle = $_POST['cycle'] ?? '';
-  $due_date = $_POST['due_date'] ?? null;
+  $due_day = intval($_POST['due_day'] ?? 0);
+  $due_month = intval($_POST['due_month'] ?? 0);
   $standard_amount = floatval($_POST['standard_amount'] ?? 0);
-  $status = 'Draft'; // ✅ Mặc định luôn là "Nháp"
   $discount_truong = floatval($_POST['discount_truong'] ?? 0);
   $discount_khoa = floatval($_POST['discount_khoa'] ?? 0);
   $discount_chidoan = floatval($_POST['discount_chidoan'] ?? 0);
   $created_by = $_SESSION['user']['userId'];
+  $current_year = date('Y');
+  $current_month = date('n');
 
-  if (empty($policy_name) || empty($cycle) || empty($due_date) || $standard_amount <= 0) {
+  // ✅ Tính toán hạn nộp (due_date)
+  if ($cycle === 'Tháng') {
+    $due_date = sprintf("%04d-%02d-%02d", $current_year, $current_month, $due_day);
+  } elseif ($cycle === 'Học kỳ' || $cycle === 'Năm') {
+    $due_date = sprintf("%04d-%02d-%02d", $current_year, $due_month, $due_day);
+  } else {
+    $due_date = null;
+  }
+
+  // Kiểm tra dữ liệu đầu vào
+  if (empty($policy_name) || empty($cycle) || !$due_date || $standard_amount <= 0) {
     $message = "<p class='error'>⚠️ Vui lòng nhập đầy đủ thông tin hợp lệ!</p>";
   } else {
-    // Lưu chính sách mới
+    // ✅ Chèn chính sách mới — status mặc định trong DB là 'Draft'
     $stmt = $conn->prepare("
-      INSERT INTO fee_policy (policy_name, cycle, due_date, standard_amount, status, created_by, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, NOW())
+      INSERT INTO fee_policy (policy_name, cycle, due_date, standard_amount, created_by, created_at)
+      VALUES (?, ?, ?, ?, ?, NOW())
     ");
-    if (!$stmt) die("SQL Error (policy): " . $conn->error);
-    $stmt->bind_param("sssdis", $policy_name, $cycle, $due_date, $standard_amount, $status, $created_by);
+    if (!$stmt) die("SQL Error: " . $conn->error);
+    $stmt->bind_param("sssdi", $policy_name, $cycle, $due_date, $standard_amount, $created_by);
 
     if ($stmt->execute()) {
       $policy_id = $stmt->insert_id;
 
-      // Thêm quy tắc miễn giảm
+      //THÊM QUY TẮC MIỄN / GIẢM
       $rules = [
         ['BCH Trường', $discount_truong],
         ['BCH Khoa', $discount_khoa],
@@ -48,42 +60,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       foreach ($rules as $rule) {
         list($role, $amount) = $rule;
         if ($amount > 0) {
-          $r = $conn->prepare("
-            INSERT INTO fee_policy_rule (policy_id, role_name, amount, created_at)
-            VALUES (?, ?, ?, NOW())
-          ");
-          if (!$r) die("SQL Error (rule): " . $conn->error);
+          $r = $conn->prepare("INSERT INTO fee_policy_rule (policy_id, role_name, amount, created_at) VALUES (?, ?, ?, NOW())");
           $r->bind_param("isd", $policy_id, $role, $amount);
           $r->execute();
         }
       }
 
-      // === TỰ ĐỘNG SINH CHU KỲ ===
-      $year = date('Y');
+      //GHI LOG LỊCH SỬ ÁP DỤNG CHÍNH SÁCH
       $periods = [];
-
       if ($cycle === 'Tháng') {
-        // 12 kỳ tháng 1–12
+        // 12 tháng của năm hiện tại
         for ($m = 1; $m <= 12; $m++) {
-          $label = sprintf("%02d/%s", $m, $year);
-          $day = date('d', strtotime($due_date));
-          $date = date('Y-m-d', strtotime("$year-$m-$day"));
-          $periods[] = [$label, $date];
+          $periods[] = [$m, sprintf("%04d-%02d-01", $current_year, $m)];
         }
       } elseif ($cycle === 'Học kỳ') {
-        // 2 kỳ học: HK1 (15/12), HK2 (15/04)
-        $periods[] = ["HK1/$year", "$year-12-15"];
-        $periods[] = ["HK2/$year", "$year-04-15"];
+        // Học kỳ 1 và 2
+        $periods[] = [1, sprintf("%04d-01-01", $current_year)];
+        $periods[] = [2, sprintf("%04d-07-01", $current_year)];
       } elseif ($cycle === 'Năm') {
-        // 4 năm học liên tiếp
-        for ($i = 1; $i <= 4; $i++) {
-          $label = "Năm $i/" . ($year + $i - 1);
-          $date = ($year + $i - 1) . "-12-15";
-          $periods[] = [$label, $date];
-        }
+        // Một chu kỳ duy nhất
+        $periods[] = [1, sprintf("%04d-01-01", $current_year)];
       }
 
-      // Ghi log lịch sử
       foreach ($periods as $p) {
         $h = $conn->prepare("
           INSERT INTO fee_policy_history (policy_id, applied_from, is_active, created_at)
@@ -94,9 +92,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $h->execute();
       }
 
-      $message = "<p class='success'>✅ Chính sách đoàn phí đã được tạo và sinh chu kỳ tự động!<br>Trạng thái mặc định: <b>Nháp (Chưa kích hoạt)</b></p>";
+      $message = "
+        <p class='success'>
+          ✅ Chính sách <b>" . htmlspecialchars($policy_name) . "</b> đã được tạo thành công!<br>
+          Chu kỳ: <b>$cycle</b> — Hạn nộp: <b>" . date('d/m/Y', strtotime($due_date)) . "</b><br>
+          🕒 Trạng thái mặc định: <b>Nháp (Draft)</b><br>
+          🧾 Đã ghi log lịch sử áp dụng cho các kỳ tương ứng.
+        </p>";
     } else {
-      $message = "<p class='error'>❌ Lỗi khi lưu chính sách. " . htmlspecialchars($conn->error) . "</p>";
+      $message = "<p class='error'>❌ Lỗi khi lưu chính sách. Chi tiết: " . htmlspecialchars($conn->error) . "</p>";
     }
   }
 }
@@ -105,31 +109,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <div class="container">
   <h2>⚙️ Thiết lập chính sách đoàn phí</h2>
   <?= $message ?>
+
   <form method="POST" class="form-policy">
     <a href="manage_policy.php" class="btn-manage">📋 Quản lý chính sách</a>
-    
+
     <div class="form-group">
       <label>Tên chính sách:</label>
-      <input type="text" name="policy_name" placeholder="VD: Chính sách đoàn phí Học kỳ I - Năm 2025" required>
+      <input type="text" name="policy_name" placeholder="VD: Chính sách đoàn phí năm 2025" required>
     </div>
 
     <div class="form-group">
       <label>Chu kỳ áp dụng:</label>
-      <select name="cycle" id="cycle" required onchange="updateDueDateOptions()">
+      <select name="cycle" id="cycle" required onchange="renderDueDate()">
         <option value="">-- Chọn chu kỳ --</option>
         <option value="Tháng">Tháng</option>
         <option value="Học kỳ">Học kỳ</option>
         <option value="Năm">Năm</option>
       </select>
-      <p class="note">🔸 Chu kỳ quyết định tần suất sinh nghĩa vụ (tháng, học kỳ hoặc năm học).</p>
+      <p class="note">🔸 Chu kỳ quyết định tần suất thu phí (Tháng, Học kỳ hoặc Năm).</p>
     </div>
 
-    <div class="form-group" id="dueDateContainer">
-      <label>Hạn nộp (Due Date):</label>
-      <input type="date" name="due_date" id="due_date" required>
-      <p class="note" id="dueDateNote">📅 Chọn ngày hạn cụ thể.</p>
-    </div>
+    <!-- Vùng hiển thị hạn nộp động -->
+    <div class="form-group" id="due_date_container"></div>
 
+    <!-- Giữ nguyên cấu trúc gốc -->
     <div class="form-group">
       <label>Mức thu chuẩn (VNĐ):</label>
       <input type="number" name="standard_amount" min="0" step="100" placeholder="VD: 3000" required>
@@ -152,37 +155,49 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </div>
 
 <script>
-function updateDueDateOptions() {
+//LOGIC CHU KỲ
+function renderDueDate() {
   const cycle = document.getElementById('cycle').value;
-  const container = document.getElementById('dueDateContainer');
+  const container = document.getElementById('due_date_container');
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
 
-  if (cycle === 'Tháng') {
+  if (cycle === "Tháng") {
     container.innerHTML = `
-      <label>Hạn nộp (Due Date):</label>
-      <input type="date" name="due_date" id="due_date" required>
-      <p class="note">📅 Chọn một ngày trong tháng (VD: 15). Hệ thống sẽ tự động tạo 12 kỳ từ tháng 1–12.</p>
+      <label>Hạn nộp (ngày trong tháng):</label>
+      <input type="number" name="due_day" min="1" max="31" placeholder="VD: 15" required>
+      <input type="hidden" name="due_month" value="${currentMonth}">
+      <p class="note">📅 Hệ thống tự động lấy tháng ${currentMonth} và năm ${currentYear}.</p>
     `;
-  } else if (cycle === 'Học kỳ') {
+  } else if (cycle === "Học kỳ") {
+    let monthOptions = "";
+    if (currentMonth >= 1 && currentMonth <= 6) {
+      for (let m = 1; m <= 6; m++) monthOptions += `<option value="${m}">${m}</option>`;
+    } else {
+      for (let m = 7; m <= 12; m++) monthOptions += `<option value="${m}">${m}</option>`;
+    }
     container.innerHTML = `
-      <label>Hạn nộp (Due Date):</label>
-      <select name="due_date" id="due_date" required>
-        <option value="">-- Chọn hạn nộp --</option>
-        <option value="${new Date().getFullYear()}-12-15">15/12 (Học kỳ I)</option>
-        <option value="${new Date().getFullYear()}-04-15">15/04 (Học kỳ II)</option>
-      </select>
-      <p class="note">📅 HK1: 15/12 | HK2: 15/04</p>
+      <label>Hạn nộp (ngày & tháng trong học kỳ):</label>
+      <div style="display:flex; gap:10px;">
+        <input type="number" name="due_day" min="1" max="31" placeholder="Ngày" required>
+        <select name="due_month" required>${monthOptions}</select>
+      </div>
+      <p class="note">📅 Năm tự động là ${currentYear}. Chỉ chọn tháng trong học kỳ hiện tại.</p>
     `;
-  } else if (cycle === 'Năm') {
+  } else if (cycle === "Năm") {
+    let monthOptions = "";
+    for (let m = 1; m <= 12; m++) monthOptions += `<option value="${m}">${m}</option>`;
     container.innerHTML = `
-      <label>Hạn nộp (Due Date):</label>
-      <input type="text" name="due_date" id="due_date" value="${new Date().getFullYear()}-12-15" readonly>
-      <p class="note">📅 Mặc định: 15/12 mỗi năm. Hệ thống sẽ tự động tạo 4 năm học.</p>
+      <label>Hạn nộp (ngày & tháng trong năm):</label>
+      <div style="display:flex; gap:10px;">
+        <input type="number" name="due_day" min="1" max="31" placeholder="Ngày" required>
+        <select name="due_month" required>${monthOptions}</select>
+      </div>
+      <p class="note">📅 Năm tự động là ${currentYear}.</p>
     `;
   } else {
-    container.innerHTML = `
-      <label>Hạn nộp (Due Date):</label>
-      <input type="date" name="due_date" id="due_date" required>
-    `;
+    container.innerHTML = "";
   }
 }
 </script>

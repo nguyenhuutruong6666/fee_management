@@ -13,7 +13,6 @@ $user = $_SESSION['user'];
 <div class="container">
   <h1>🏠 Trang chính</h1>
   <p>Chào mừng <?= htmlspecialchars($user['fullName']) ?> đến với hệ thống quản lý đoàn phí!</p>
-  <p>Chọn một chức năng trong thanh menu để bắt đầu.</p>
 
   <div class="actions">
     <?php if (!$user['isAdmin']): ?>
@@ -35,7 +34,7 @@ body {
 }
 .container {
   margin-left: 240px;
-  max-width: calc(100% - 260px);
+  max-width: calc(100% - 320px);
   padding: 40px 30px;
   transition: margin-left 0.3s ease;
 }
