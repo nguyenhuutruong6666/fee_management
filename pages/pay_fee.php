@@ -187,7 +187,7 @@ $obligations = $conn->query($sql);
 </div>
 
 <style>
-.container { padding:25px; margin-left:240px; max-width:calc(100% - 260px); }
+.container { padding:25px; margin-left:240px; max-width:calc(100% - 310px); }
 h2 { text-align:center; color:#2d3436; margin-bottom:25px; }
 .btn-manage { background:#0984e3; color:white; padding:8px 14px; text-decoration:none; border-radius:6px; font-weight:600; }
 .obligation-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:20px; }
