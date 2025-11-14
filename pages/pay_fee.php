@@ -66,11 +66,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['obligation_id'])) {
         SELECT id, 'Thu', amount, $user_id, 'BCH xác nhận thu tiền mặt' 
         FROM fee_payment WHERE transaction_code='$transaction_code'
       ");
-      $message = "<p class='success'>✅ Nộp tiền mặt thành công! (BCH xác nhận tự động)</p>";
+      $message = "<p class='success'>Nộp tiền mặt thành công! (BCH xác nhận tự động)</p>";
     } else {
       // Đoàn viên thường -> chờ BCH xác nhận
       $conn->query("UPDATE fee_payment SET status='Pending' WHERE transaction_code='$transaction_code'");
-      $message = "<p class='success'>🕓 Đã ghi nhận nộp tiền mặt. Đang chờ BCH Chi đoàn xác nhận.</p>";
+      $message = "<p class='success'>Đã ghi nhận nộp tiền mặt. Đang chờ BCH Chi đoàn xác nhận.</p>";
     }
   }
 
@@ -106,7 +106,7 @@ if (isset($_POST['confirm_transfer'])) {
     SELECT id, 'Thu', amount, $user_id, 'Nộp đoàn phí qua VietQR' 
     FROM fee_payment WHERE transaction_code='$transaction_code'
   ");
-  $message = "<p class='success'>✅ Xác nhận chuyển khoản thành công!</p>";
+  $message = "<p class='success'>Xác nhận chuyển khoản thành công!</p>";
 }
 
 
@@ -122,13 +122,13 @@ $obligations = $conn->query($sql);
 ?>
 
 <div class="container">
-  <h2>💳 Nghĩa vụ đoàn phí của bạn</h2>
+  <h2>Nghĩa vụ đoàn phí của bạn</h2>
   <?= $message ?>
 
   <!-- Nút cho BCH / Admin -->
   <?php if (in_array($user_role, ['BCH Chi đoàn']) || ($user['isAdmin'] ?? 0) == 1): ?>
     <div style="text-align:right; margin-bottom:15px;">
-      <a href="confirm_cash_payment.php" class="btn-manage">🔑 Trang xác nhận tiền mặt (BCH)</a>
+      <a href="confirm_cash_payment.php" class="btn-manage">Trang xác nhận tiền mặt (BCH)</a>
     </div>
   <?php endif; ?>
 
@@ -145,7 +145,7 @@ $obligations = $conn->query($sql);
     $qrText = "https://img.vietqr.io/image/$bank-$accountNo-compact2.png?amount=$amount&addInfo=$ref&accountName=$accountName";
   ?>
     <div class="qr-box">
-      <h3>🏦 Quét mã VietQR để nộp đoàn phí</h3>
+      <h3>Quét mã VietQR để nộp đoàn phí</h3>
       <p><strong>Số tiền:</strong> <?= number_format($amount, 0, ',', '.') ?>đ</p>
       <img src="<?= htmlspecialchars($qrText) ?>" alt="VietQR" class="qr-image">
       <p><strong>Nội dung chuyển khoản:</strong> <?= htmlspecialchars($ref) ?></p>
@@ -153,9 +153,9 @@ $obligations = $conn->query($sql);
       <form method="POST" style="margin-top:15px;">
         <input type="hidden" name="obligation_id" value="<?= $obligation_id ?>">
         <input type="hidden" name="transaction_code" value="<?= $txn['transaction_code'] ?>">
-        <button type="submit" name="confirm_transfer" class="btn-confirm">✅ Tôi đã chuyển khoản</button>
+        <button type="submit" name="confirm_transfer" class="btn-confirm">Tôi đã chuyển khoản</button>
       </form>
-      <a href="pay_fee.php" class="btn-back">⬅️ Quay lại</a>
+      <a href="pay_fee.php" class="btn-back">Quay lại</a>
     </div>
   <?php unset($_SESSION['qr_transaction']); endif; ?>
 
@@ -164,25 +164,25 @@ $obligations = $conn->query($sql);
       <?php while ($o = $obligations->fetch_assoc()): ?>
         <div class="obligation-card">
           <h3><?= htmlspecialchars($o['policy_name']) ?></h3>
-          <p>📅 Chu kỳ: <strong><?= $o['period_label'] ?></strong></p>
-          <p>🕒 Hạn nộp: <?= date("d/m/Y", strtotime($o['due_date'])) ?></p>
-          <p>💵 Số tiền: <strong><?= number_format($o['amount'], 0, ',', '.') ?>đ</strong></p>
-          <p>🔖 Mã tham chiếu: <strong><?= htmlspecialchars($o['reference_code']) ?></strong></p>
+          <p>Chu kỳ: <strong><?= $o['period_label'] ?></strong></p>
+          <p>Hạn nộp: <?= date("d/m/Y", strtotime($o['due_date'])) ?></p>
+          <p>Số tiền: <strong><?= number_format($o['amount'], 0, ',', '.') ?>đ</strong></p>
+          <p>Mã tham chiếu: <strong><?= htmlspecialchars($o['reference_code']) ?></strong></p>
 
           <form method="POST" class="payment-form">
             <input type="hidden" name="obligation_id" value="<?= $o['id'] ?>">
             <input type="hidden" name="amount" value="<?= $o['amount'] ?>">
             <input type="hidden" name="reference" value="<?= htmlspecialchars($o['reference_code']) ?>">
             <div class="payment-buttons">
-              <button type="submit" name="method" value="Cash" class="btn-cash">💵 Nộp tiền mặt</button>
-              <button type="submit" name="method" value="VietQR" class="btn-qr">🏦 Chuyển khoản VietQR</button>
+              <button type="submit" name="method" value="Cash" class="btn-cash">Nộp tiền mặt</button>
+              <button type="submit" name="method" value="VietQR" class="btn-qr">Chuyển khoản VietQR</button>
             </div>
           </form>
         </div>
       <?php endwhile; ?>
     </div>
   <?php else: ?>
-    <p>✅ Bạn không còn nghĩa vụ nào cần nộp.</p>
+    <p>Bạn không còn nghĩa vụ nào cần nộp.</p>
   <?php endif; ?>
 </div>
 

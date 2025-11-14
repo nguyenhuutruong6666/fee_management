@@ -64,27 +64,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['code_expire'] = time() + 300; // 5 phút
 
             if (sendVerificationCode($email, $code)) {
-                $message = "<p class='success'>✅ Mã xác minh đã được gửi đến email của bạn!</p>";
+                $message = "<p class='success'>Mã xác minh đã được gửi đến email của bạn!</p>";
                 $step = 2;
             } else {
-                $message = "<p class='error'>❌ Không thể gửi email. Vui lòng thử lại sau.</p>";
+                $message = "<p class='error'>Không thể gửi email. Vui lòng thử lại sau.</p>";
             }
         } else {
-            $message = "<p class='error'>❌ Email không tồn tại trong hệ thống.</p>";
+            $message = "<p class='error'>Email không tồn tại trong hệ thống.</p>";
         }
     }
     elseif (isset($_POST['verify_code'])) {
         $code = trim($_POST['verify_code']);
         if (isset($_SESSION['reset_code']) && time() < $_SESSION['code_expire']) {
             if ($code == $_SESSION['reset_code']) {
-                $message = "<p class='success'>✅ Mã chính xác! Vui lòng nhập mật khẩu mới.</p>";
+                $message = "<p class='success'>Mã chính xác! Vui lòng nhập mật khẩu mới.</p>";
                 $step = 3;
             } else {
-                $message = "<p class='error'>⚠️ Mã xác minh không chính xác!</p>";
+                $message = "<p class='error'>Mã xác minh không chính xác!</p>";
                 $step = 2;
             }
         } else {
-            $message = "<p class='error'>⏰ Mã đã hết hạn. Vui lòng gửi lại yêu cầu.</p>";
+            $message = "<p class='error'>Mã đã hết hạn. Vui lòng gửi lại yêu cầu.</p>";
             $step = 1;
         }
     }
@@ -94,15 +94,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = $_SESSION['reset_email'] ?? '';
 
         if ($new !== $confirm) {
-            $message = "<p class='error'>⚠️ Mật khẩu xác nhận không khớp!</p>";
+            $message = "<p class='error'>Mật khẩu xác nhận không khớp!</p>";
             $step = 3;
         } elseif (strlen($new) < 6) {
-            $message = "<p class='error'>⚠️ Mật khẩu phải có ít nhất 6 ký tự.</p>";
+            $message = "<p class='error'>Mật khẩu phải có ít nhất 6 ký tự.</p>";
             $step = 3;
         } else {
             $conn->query("UPDATE users SET password='$new' WHERE email='$email'");
             unset($_SESSION['reset_email'], $_SESSION['reset_code']);
-            $message = "<p class='success'>✅ Đặt lại mật khẩu thành công! <a href='login.php'>Đăng nhập</a></p>";
+            $message = "<p class='success'>Đặt lại mật khẩu thành công! <a href='login.php'>Đăng nhập</a></p>";
             $step = 4;
         }
     }

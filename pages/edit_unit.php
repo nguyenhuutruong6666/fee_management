@@ -29,13 +29,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: units.php");
     exit();
   } else {
-    $message = "<p class='error'>❌ Lỗi khi cập nhật đơn vị.</p>";
+    $message = "<p class='error'>Lỗi khi cập nhật đơn vị.</p>";
   }
 }
 ?>
 
 <div class="container">
-  <h2>✏️ Sửa thông tin đơn vị</h2>
+  <h2>Sửa thông tin đơn vị</h2>
   <?= $message ?>
 
   <form method="POST">
@@ -54,8 +54,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <input type="number" name="deputy_id" value="<?= $unit['deputy_id'] ?? '' ?>" placeholder="Nhập ID người dùng">
     </div>
 
-    <button type="submit" class="btn-save">💾 Lưu</button>
-    <a href="units.php" class="btn-back">⬅️ Quay lại</a>
+    <button type="submit" class="btn-save">Lưu</button>
+    <a href="units.php" class="btn-back">Quay lại</a>
   </form>
 </div>
 

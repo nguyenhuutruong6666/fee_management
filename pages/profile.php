@@ -36,14 +36,14 @@ $result = $conn->query($query);
 $user = $result->fetch_assoc();
 
 if (!$user) {
-    echo "<div class='container'><p>❌ Không tìm thấy thông tin tài khoản.</p></div>";
+    echo "<div class='container'><p>Không tìm thấy thông tin tài khoản.</p></div>";
     include("../includes/footer.php");
     exit();
 }
 ?>
 
 <div class="container">
-  <h2>👤 Thông tin tài khoản</h2>
+  <h2>Thông tin tài khoản</h2>
 
   <div class="profile-card">
     <div class="profile-header">
@@ -54,7 +54,7 @@ if (!$user) {
         <h3><?= htmlspecialchars($user['fullName'] ?? 'Chưa cập nhật') ?></h3>
         <p><b>Vai trò:</b> <?= htmlspecialchars($user['role_name'] ?? 'Chưa gán vai trò') ?></p>
         <p><b>Đơn vị:</b> <?= htmlspecialchars($user['unit_name'] ?? 'Chưa cập nhật') ?></p>
-        <p><b>Trạng thái:</b> <?= ($user['isAdmin'] ? '🛡️ Quản trị viên' : '✅ Hoạt động') ?></p>
+        <p><b>Trạng thái:</b> <?= ($user['isAdmin'] ? 'Quản trị viên' : 'Hoạt động') ?></p>
       </div>
     </div>
 
@@ -83,8 +83,8 @@ if (!$user) {
     </div>
     
     <div class="profile-footer">
-      <a href="edit_user.php?id=<?= $user['userId'] ?>" class="btn-edit">✏️ Chỉnh sửa thông tin</a>
-      <a href="change_password.php" class="btn-password">🔑 Đổi mật khẩu</a>
+      <a href="edit_user.php?id=<?= $user['userId'] ?>" class="btn-edit">Chỉnh sửa thông tin</a>
+      <a href="change_password.php" class="btn-password">Đổi mật khẩu</a>
     </div>
   </div>
 </div>

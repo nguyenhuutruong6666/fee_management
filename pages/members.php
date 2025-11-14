@@ -6,7 +6,7 @@ include("../config/db.php");
 
 //KIỂM TRA QUYỀN TRUY CẬP
 if (!isset($_SESSION['user'])) {
-    echo "<div class='container'><p style='color:red;'>🚫 Bạn chưa đăng nhập.</p></div>";
+    echo "<div class='container'><p style='color:red;'>Bạn chưa đăng nhập.</p></div>";
     include("../includes/footer.php");
     exit();
 }
@@ -18,7 +18,7 @@ $userUnit = intval($currentUser['unit'] ?? 0);
 $allowedRoles = ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'];
 
 if ($currentUser['isAdmin'] != 1 && !in_array($role, $allowedRoles)) {
-    echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+    echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
     include("../includes/footer.php");
     exit();
 }
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_id'])) {
 
   //Ngăn người dùng tự xóa chính mình
   if ($deleteId === $userId) {
-      $message = "<p class='error'>⚠️ Bạn không thể tự xóa tài khoản của chính mình.</p>";
+      $message = "<p class='error'>Bạn không thể tự xóa tài khoản của chính mình.</p>";
   } else {
       // Lấy vai trò của người bị xóa
       $stmt = $conn->prepare("
@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_id'])) {
 
       //Ngăn xóa người có cùng cấp vai trò (trừ Admin)
       if ($currentUser['isAdmin'] != 1 && $role === $targetRole) {
-          $message = "<p class='error'>🚫 Bạn không thể xóa người có cùng vai trò ($targetRole) với mình.</p>";
+          $message = "<p class='error'>Bạn không thể xóa người có cùng vai trò ($targetRole) với mình.</p>";
       } else {
           // Kiểm tra tồn tại người bị xóa
           $check = $conn->prepare("SELECT userId FROM users WHERE userId=?");
@@ -64,9 +64,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_id'])) {
               $conn->query("DELETE FROM fee_receipt WHERE issued_by=$deleteId");
               $conn->query("DELETE FROM users WHERE userId=$deleteId");
 
-              $message = "<p class='success'>✅ Đã xóa đoàn viên ID #$deleteId thành công!</p>";
+              $message = "<p class='success'>Đã xóa đoàn viên ID #$deleteId thành công!</p>";
           } else {
-              $message = "<p class='error'>⚠️ Không tìm thấy đoàn viên cần xóa.</p>";
+              $message = "<p class='error'>Không tìm thấy đoàn viên cần xóa.</p>";
           }
       }
   }
@@ -126,7 +126,7 @@ $result = $conn->query($sql);
 ?>
 
 <div class="container">
-  <h2>📋 Danh sách đoàn viên</h2>
+  <h2>Danh sách đoàn viên</h2>
   <?= $message ?>
 
   <!-- BỘ LỌC -->
@@ -150,8 +150,8 @@ $result = $conn->query($sql);
       <?php endwhile; ?>
     </select>
 
-    <button type="submit" class="btn-filter">✅ Xác nhận</button>
-    <a href="?" class="btn-clear">🧹 Xóa lọc</a>
+    <button type="submit" class="btn-filter">Xác nhận</button>
+    <a href="?" class="btn-clear">Xóa lọc</a>
   </form>
 
   <!-- BẢNG DANH SÁCH -->
@@ -184,10 +184,10 @@ $result = $conn->query($sql);
             <td><?= htmlspecialchars($row['unit_name'] ?? 'Chưa cập nhật') ?></td>
             <td><?= htmlspecialchars($row['role_name'] ?? 'Đoàn viên') ?></td>
             <td>
-              <?php if ($row['userId'] != $userId): // ✅ Ẩn nút xóa chính mình ?>
+              <?php if ($row['userId'] != $userId): // Ẩn nút xóa chính mình ?>
               <form method="POST" onsubmit="return confirmDelete(this);">
                 <input type="hidden" name="delete_id" value="<?= $row['userId'] ?>">
-                <button type="submit" class="btn-delete">🗑️</button>
+                <button type="submit" class="btn-delete">Xóa</button>
               </form>
               <?php else: ?>
                 <span style="color:#999;">--</span>
@@ -204,7 +204,7 @@ $result = $conn->query($sql);
 
 <script>
 function confirmDelete(form) {
-  return confirm('⚠️ Bạn có chắc muốn xóa đoàn viên này không? Hành động này không thể hoàn tác!');
+  return confirm('Bạn có chắc muốn xóa đoàn viên này không? Hành động này không thể hoàn tác!');
 }
 </script>
 

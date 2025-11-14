@@ -6,7 +6,7 @@ include("../config/db.php");
 
 // Chỉ Admin được vào
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
-    echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+    echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
     include("../includes/footer.php");
     exit();
 }
@@ -23,7 +23,7 @@ if (isset($_POST['preview'])) {
         // Cột chuẩn CSV
         $expected = ["userName","fullName","email","identifyCard","gender","birthDate","joinDate","unit_name","password","role_name","isAdmin"];
         if ($header !== $expected) {
-            $message = "<p class='error'>⚠️ File CSV không đúng định dạng. Vui lòng tải lại <a href='../public/templates/users_template.csv'>file mẫu</a>.</p>";
+            $message = "<p class='error'>File CSV không đúng định dạng. Vui lòng tải lại <a href='../public/templates/users_template.csv'>file mẫu</a>.</p>";
         } else {
             while (($row = fgetcsv($file)) !== FALSE) {
                 if (count($row) == count($expected)) {
@@ -33,7 +33,7 @@ if (isset($_POST['preview'])) {
         }
         fclose($file);
     } else {
-        $message = "<p class='error'>❌ Bạn chưa chọn file CSV để tải lên.</p>";
+        $message = "<p class='error'>Bạn chưa chọn file CSV để tải lên.</p>";
     }
 }
 
@@ -102,9 +102,9 @@ if (isset($_POST['import_confirm'])) {
     }
 
     // Thông báo kết quả
-    $msg = "✅ Import hoàn tất: $success thành công, $fail lỗi.";
-    if (!empty($missingUnits)) $msg .= "\\n⚠️ Đơn vị chưa tồn tại: " . implode(", ", array_unique($missingUnits));
-    if (!empty($existingUsers)) $msg .= "\\n⚠️ Người dùng trùng email/CCCD: " . implode(", ", $existingUsers);
+    $msg = "Import hoàn tất: $success thành công, $fail lỗi.";
+    if (!empty($missingUnits)) $msg .= "\\nĐơn vị chưa tồn tại: " . implode(", ", array_unique($missingUnits));
+    if (!empty($existingUsers)) $msg .= "\\nNgười dùng trùng email/CCCD: " . implode(", ", $existingUsers);
 
     echo "<script>alert('$msg'); window.location.href='users.php';</script>";
     exit();
@@ -112,7 +112,7 @@ if (isset($_POST['import_confirm'])) {
 ?>
 
 <div class="container">
-  <h2>📂 Import danh sách người dùng</h2>
+  <h2>Import danh sách người dùng</h2>
   <?= $message ?>
 
   <form method="POST" enctype="multipart/form-data" class="form-import">
@@ -122,14 +122,14 @@ if (isset($_POST['import_confirm'])) {
     </div>
 
     <div class="form-actions">
-      <button type="submit" name="preview" class="btn-preview">👁️ Xem trước</button>
-      <a href="../public/templates/users_template.csv" class="btn-template" download>⬇️ Tải file mẫu</a>
-      <a href="users.php" class="btn-back">⬅️ Quay lại</a>
+      <button type="submit" name="preview" class="btn-preview">Xem trước</button>
+      <a href="../public/templates/test.csv" class="btn-template" download>Tải file mẫu</a>
+      <a href="users.php" class="btn-back">Quay lại</a>
     </div>
   </form>
 
   <?php if (!empty($previewData)): ?>
-    <h3>🔍 Bản xem trước dữ liệu:</h3>
+    <h3>Bản xem trước dữ liệu:</h3>
     <form method="POST">
       <input type="hidden" name="data" value='<?= json_encode($previewData) ?>'>
       <table class="table">
@@ -150,7 +150,7 @@ if (isset($_POST['import_confirm'])) {
           <?php endforeach; ?>
         </tbody>
       </table>
-      <button type="submit" name="import_confirm" class="btn-save">💾 Xác nhận Import</button>
+      <button type="submit" name="import_confirm" class="btn-save">Xác nhận Import</button>
     </form>
   <?php endif; ?>
 </div>

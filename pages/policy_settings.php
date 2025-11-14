@@ -6,7 +6,7 @@ include("../config/db.php");
 
 //Chỉ quản trị viên mới được truy cập
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
-  echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+  echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
   exit();
 }
@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $current_year = date('Y');
   $current_month = date('n');
 
-  // ✅ Tính toán hạn nộp (due_date)
+  // Tính toán hạn nộp (due_date)
   if ($cycle === 'Tháng') {
     $due_date = sprintf("%04d-%02d-%02d", $current_year, $current_month, $due_day);
   } elseif ($cycle === 'Học kỳ' || $cycle === 'Năm') {
@@ -38,9 +38,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   // Kiểm tra dữ liệu đầu vào
   if (empty($policy_name) || empty($cycle) || !$due_date || $standard_amount <= 0) {
-    $message = "<p class='error'>⚠️ Vui lòng nhập đầy đủ thông tin hợp lệ!</p>";
+    $message = "<p class='error'>Vui lòng nhập đầy đủ thông tin hợp lệ!</p>";
   } else {
-    // ✅ Chèn chính sách mới — status mặc định trong DB là 'Draft'
+    // Chèn chính sách mới — status mặc định trong DB là 'Draft'
     $stmt = $conn->prepare("
       INSERT INTO fee_policy (policy_name, cycle, due_date, standard_amount, created_by, created_at)
       VALUES (?, ?, ?, ?, ?, NOW())
@@ -94,25 +94,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       $message = "
         <p class='success'>
-          ✅ Chính sách <b>" . htmlspecialchars($policy_name) . "</b> đã được tạo thành công!<br>
+          Chính sách <b>" . htmlspecialchars($policy_name) . "</b> đã được tạo thành công!<br>
           Chu kỳ: <b>$cycle</b> — Hạn nộp: <b>" . date('d/m/Y', strtotime($due_date)) . "</b><br>
-          🕒 Trạng thái mặc định: <b>Nháp (Draft)</b><br>
-          🧾 Đã ghi log lịch sử áp dụng cho các kỳ tương ứng.
+          Trạng thái mặc định: <b>Nháp (Draft)</b><br>
+          Đã ghi log lịch sử áp dụng cho các kỳ tương ứng.
         </p>";
     } else {
-      $message = "<p class='error'>❌ Lỗi khi lưu chính sách. Chi tiết: " . htmlspecialchars($conn->error) . "</p>";
+      $message = "<p class='error'>Lỗi khi lưu chính sách. Chi tiết: " . htmlspecialchars($conn->error) . "</p>";
     }
   }
 }
 ?>
 
 <div class="container">
-  <h2>⚙️ Thiết lập chính sách đoàn phí</h2>
+  <h2>Thiết lập chính sách đoàn phí</h2>
   <?= $message ?>
+  <a href="manage_policy.php" class="btn-manage">Quản lý chính sách</a>
 
   <form method="POST" class="form-policy">
-    <a href="manage_policy.php" class="btn-manage">📋 Quản lý chính sách</a>
-
     <div class="form-group">
       <label>Tên chính sách:</label>
       <input type="text" name="policy_name" placeholder="VD: Chính sách đoàn phí năm 2025" required>
@@ -126,7 +125,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <option value="Học kỳ">Học kỳ</option>
         <option value="Năm">Năm</option>
       </select>
-      <p class="note">🔸 Chu kỳ quyết định tần suất thu phí (Tháng, Học kỳ hoặc Năm).</p>
     </div>
 
     <!-- Vùng hiển thị hạn nộp động -->
@@ -148,8 +146,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn-save">💾 Lưu chính sách</button>
-      <a href="dashboard.php" class="btn-back">⬅️ Quay lại</a>
+      <button type="submit" class="btn-save">Lưu chính sách</button>
+      <a href="dashboard.php" class="btn-back">Quay lại</a>
     </div>
   </form>
 </div>
@@ -168,7 +166,7 @@ function renderDueDate() {
       <label>Hạn nộp (ngày trong tháng):</label>
       <input type="number" name="due_day" min="1" max="31" placeholder="VD: 15" required>
       <input type="hidden" name="due_month" value="${currentMonth}">
-      <p class="note">📅 Hệ thống tự động lấy tháng ${currentMonth} và năm ${currentYear}.</p>
+      <p class="note">Hệ thống tự động lấy tháng ${currentMonth} và năm ${currentYear}.</p>
     `;
   } else if (cycle === "Học kỳ") {
     let monthOptions = "";
@@ -183,7 +181,7 @@ function renderDueDate() {
         <input type="number" name="due_day" min="1" max="31" placeholder="Ngày" required>
         <select name="due_month" required>${monthOptions}</select>
       </div>
-      <p class="note">📅 Năm tự động là ${currentYear}. Chỉ chọn tháng trong học kỳ hiện tại.</p>
+      <p class="note">Năm tự động là ${currentYear}. Chỉ chọn tháng trong học kỳ hiện tại.</p>
     `;
   } else if (cycle === "Năm") {
     let monthOptions = "";
@@ -194,7 +192,7 @@ function renderDueDate() {
         <input type="number" name="due_day" min="1" max="31" placeholder="Ngày" required>
         <select name="due_month" required>${monthOptions}</select>
       </div>
-      <p class="note">📅 Năm tự động là ${currentYear}.</p>
+      <p class="note">Năm tự động là ${currentYear}.</p>
     `;
   } else {
     container.innerHTML = "";
@@ -215,7 +213,7 @@ input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius
 .form-actions { margin-top: 20px; display: flex; justify-content: space-between; gap: 10px; }
 .btn-save { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; padding: 10px 22px; border-radius: 8px; cursor: pointer; font-weight: 600; }
 .btn-save:hover { background: linear-gradient(135deg, #5e56d6, #938df5); }
-.btn-manage { background: linear-gradient(135deg, #00b894, #00cec9); color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: 600; }
+.btn-manage { background: linear-gradient(135deg, #00b894, #00cec9); color: white; margin-left:25px; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: 600; }
 .btn-manage:hover { background: linear-gradient(135deg, #019875, #00b5ad); }
 .btn-back { background: #b2bec3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; }
 .error { color: #d63031; font-weight: bold; text-align: center; }

@@ -19,7 +19,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
   </div>
   <div class="header-right">
     <?php if(isset($_SESSION['user'])): ?>
-      <span>👋 Xin chào, <b><?php echo htmlspecialchars($_SESSION['user']['userName']); ?></b></span>
+      <span>Xin chào, <b><?php echo htmlspecialchars($_SESSION['user']['userName']); ?></b></span>
       <a href="logout.php" class="btn-logout">Đăng xuất</a>
     <?php endif; ?>
   </div>

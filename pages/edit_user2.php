@@ -15,7 +15,7 @@ $userId = isset($_GET['id']) ? intval($_GET['id']) : $currentUser['userId'];
 
 // Phân quyền: chỉ Admin được sửa người khác
 // if (!$currentUser['isAdmin'] && $currentUser['userId'] !== $userId) {
-//     echo "<div class='container'><p style='color:red;'>❌ Bạn không có quyền chỉnh sửa tài khoản này.</p></div>";
+//     echo "<div class='container'><p style='color:red;'>Bạn không có quyền chỉnh sửa tài khoản này.</p></div>";
 //     include("../includes/footer.php");
 //     exit();
 // }
@@ -31,7 +31,7 @@ $query = "
 ";
 $result = $conn->query($query);
 if (!$result || $result->num_rows === 0) {
-    echo "<div class='container'><p>❌ Không tìm thấy tài khoản.</p></div>";
+    echo "<div class='container'><p>Không tìm thấy tài khoản.</p></div>";
     include("../includes/footer.php");
     exit();
 }
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $unit = $currentUser['isAdmin'] ? intval($_POST['unit']) : $user['unit'];
 
     if (empty($fullName) || empty($email)) {
-        $message = "<p class='error'>⚠️ Vui lòng nhập đầy đủ thông tin.</p>";
+        $message = "<p class='error'>Vui lòng nhập đầy đủ thông tin.</p>";
     } else {
         // Cập nhật bảng users
         $stmt = $conn->prepare("
@@ -84,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             header("Location: users.php");
             exit();
         } else {
-            $message = "<p class='error'>❌ Lỗi khi cập nhật dữ liệu, vui lòng thử lại.</p>";
+            $message = "<p class='error'>Lỗi khi cập nhật dữ liệu, vui lòng thử lại.</p>";
         }
     }
 }
@@ -97,7 +97,7 @@ $units = $conn->query("SELECT id, unit_name, unit_level FROM organization_units 
 ?>
 
 <div class="container">
-  <h2>✏️ Chỉnh sửa thông tin tài khoản</h2>
+  <h2>Chỉnh sửa thông tin tài khoản</h2>
   <?= $message ?>
 
   <form method="POST" class="form-edit">
@@ -179,8 +179,8 @@ $units = $conn->query("SELECT id, unit_name, unit_level FROM organization_units 
     <?php endif; ?>
 
     <div class="form-actions">
-      <button type="submit" class="btn-save">💾 Lưu thay đổi</button>
-      <a href="users.php" class="btn-back">⬅️ Quay lại</a>
+      <button type="submit" class="btn-save">Lưu thay đổi</button>
+      <a href="users.php" class="btn-back">Quay lại</a>
     </div>
   </form>
 </div>

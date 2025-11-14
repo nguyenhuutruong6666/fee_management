@@ -18,7 +18,7 @@ $message = "";
 //Chỉ BCH và Admin được phép vào
 $allowed_roles = ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'];
 if (!in_array($role_name, $allowed_roles) && !$user['isAdmin']) {
-  echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+  echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
   exit();
 }
@@ -57,9 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id']) && isse
       ");
     }
 
-    $message = "<p class='success'>✅ Cập nhật trạng thái thành công!</p>";
+    $message = "<p class='success'>Cập nhật trạng thái thành công!</p>";
   } else {
-    $message = "<p class='error'>❌ Không tìm thấy giao dịch.</p>";
+    $message = "<p class='error'>Không tìm thấy giao dịch.</p>";
   }
 }
 
@@ -137,7 +137,7 @@ $transactions = $conn->query($sql);
                   <option value="Canceled">Canceled</option>
                 </select>
                 <input type="text" name="note" placeholder="Ghi chú..." value="<?= htmlspecialchars($t['note'] ?? '') ?>">
-                <button type="submit" class="btn-update">💾 Lưu</button>
+                <button type="submit" class="btn-update">Lưu</button>
               </form>
 
               <!-- Nút nhắc nợ -->
@@ -147,7 +147,7 @@ $transactions = $conn->query($sql);
                   <input type="hidden" name="payer_unit" value="<?= htmlspecialchars($t['payer_unit']) ?>">
                   <input type="hidden" name="amount" value="<?= $t['amount'] ?>">
                   <input type="hidden" name="period_label" value="<?= htmlspecialchars($t['period_label']) ?>">
-                  <button type="submit" class="btn-remind">💬 Nhắc nợ</button>
+                  <button type="submit" class="btn-remind">Nhắc nợ</button>
                 </form>
               <?php endif; ?>
             </td>

@@ -6,7 +6,7 @@ include("../config/db.php");
 
 //Chỉ quản trị viên có quyền
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
-  echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+  echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
   exit();
 }
@@ -36,15 +36,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_id'])) {
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     if ($row['status'] === 'Active') {
-      $message = "<p class='error'>⚠️ Không thể xóa chính sách đang hoạt động. Vui lòng hủy kích hoạt trước.</p>";
+      $message = "<p class='error'>Không thể xóa chính sách đang hoạt động. Vui lòng hủy kích hoạt trước.</p>";
     } else {
       $conn->query("DELETE FROM fee_policy_rule WHERE policy_id = $deleteId");
       $del = $conn->prepare("DELETE FROM fee_policy WHERE id = ?");
       $del->bind_param("i", $deleteId);
       if ($del->execute()) {
-        $message = "<p class='success'>✅ Đã xóa chính sách đoàn phí thành công!</p>";
+        $message = "<p class='success'>Đã xóa chính sách đoàn phí thành công!</p>";
       } else {
-        $message = "<p class='error'>❌ Lỗi khi xóa chính sách.</p>";
+        $message = "<p class='error'>Lỗi khi xóa chính sách.</p>";
       }
     }
   }
@@ -56,14 +56,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['activate_id'])) {
 
   $check = $conn->query("SELECT id FROM fee_policy WHERE status = 'Active' LIMIT 1");
   if ($check->num_rows > 0) {
-    $message = "<p class='error'>⚠️ Hiện đã có một chính sách đang 'Kích hoạt'. Hãy hủy kích hoạt chính sách hiện tại trước.</p>";
+    $message = "<p class='error'>Hiện đã có một chính sách đang 'Kích hoạt'. Hãy hủy kích hoạt chính sách hiện tại trước.</p>";
   } else {
     $update = $conn->prepare("UPDATE fee_policy SET status = 'Active' WHERE id = ?");
     $update->bind_param("i", $activateId);
     if ($update->execute()) {
-      $message = "<p class='success'>✅ Chính sách đã được kích hoạt thành công!</p>";
+      $message = "<p class='success'>Chính sách đã được kích hoạt thành công!</p>";
     } else {
-      $message = "<p class='error'>❌ Lỗi khi kích hoạt chính sách.</p>";
+      $message = "<p class='error'>Lỗi khi kích hoạt chính sách.</p>";
     }
   }
 }
@@ -75,9 +75,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['deactivate_id'])) {
   $update = $conn->prepare("UPDATE fee_policy SET status = 'Draft' WHERE id = ?");
   $update->bind_param("i", $deactivateId);
   if ($update->execute()) {
-    $message = "<p class='success'>🔄 Chính sách đã được chuyển sang trạng thái 'Nháp'.</p>";
+    $message = "<p class='success'>Chính sách đã được chuyển sang trạng thái 'Nháp'.</p>";
   } else {
-    $message = "<p class='error'>❌ Lỗi khi hủy kích hoạt chính sách.</p>";
+    $message = "<p class='error'>Lỗi khi hủy kích hoạt chính sách.</p>";
   }
 }
 
@@ -100,11 +100,11 @@ $result = $conn->query($sql);
 ?>
 
 <div class="container">
-  <h2>🗂️ Quản lý chính sách đoàn phí</h2>
+  <h2>Quản lý chính sách đoàn phí</h2>
   <?= $message ?>
 
   <div class="actions">
-    <a href="policy_settings.php" class="btn-add">➕ Thêm chính sách mới</a>
+    <a href="policy_settings.php" class="btn-add">Thêm chính sách mới</a>
   </div>
 
   <table class="table">
@@ -145,16 +145,16 @@ $result = $conn->query($sql);
               <?php if ($row['status'] === 'Active'): ?>
                 <form method="POST" style="display:inline;" onsubmit="return confirmDeactivate();">
                   <input type="hidden" name="deactivate_id" value="<?= $row['id'] ?>">
-                  <button type="submit" class="btn-deactivate">🔄 Hủy kích hoạt</button>
+                  <button type="submit" class="btn-deactivate">Hủy kích hoạt</button>
                 </form>
               <?php else: ?>
                 <form method="POST" style="display:inline;" onsubmit="return confirmActivate();">
                   <input type="hidden" name="activate_id" value="<?= $row['id'] ?>">
-                  <button type="submit" class="btn-activate">⚡ Kích hoạt</button>
+                  <button type="submit" class="btn-activate">Kích hoạt</button>
                 </form>
                 <form method="POST" style="display:inline;" onsubmit="return confirmDelete();">
                   <input type="hidden" name="delete_id" value="<?= $row['id'] ?>">
-                  <button type="submit" class="btn-delete">🗑️ Xóa</button>
+                  <button type="submit" class="btn-delete">Xóa</button>
                 </form>
               <?php endif; ?>
             </td>
@@ -169,13 +169,13 @@ $result = $conn->query($sql);
 
 <script>
 function confirmDelete() {
-  return confirm('⚠️ Bạn có chắc muốn xóa chính sách này không? Hành động này không thể hoàn tác!');
+  return confirm('Bạn có chắc muốn xóa chính sách này không? Hành động này không thể hoàn tác!');
 }
 function confirmActivate() {
-  return confirm('⚡ Bạn có chắc muốn kích hoạt chính sách này không? Hệ thống chỉ được phép có duy nhất 1 chính sách hoạt động!');
+  return confirm('Bạn có chắc muốn kích hoạt chính sách này không? Hệ thống chỉ được phép có duy nhất 1 chính sách hoạt động!');
 }
 function confirmDeactivate() {
-  return confirm('🔄 Bạn có chắc muốn hủy kích hoạt chính sách này và chuyển về trạng thái "Nháp"?');
+  return confirm('Bạn có chắc muốn hủy kích hoạt chính sách này và chuyển về trạng thái "Nháp"?');
 }
 </script>
 

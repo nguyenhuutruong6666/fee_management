@@ -15,7 +15,7 @@ $user = $_SESSION['user'];
 $role_name = $user['role_name'] ?? '';
 $allowed_roles = ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'];
 if (!in_array($role_name, $allowed_roles) && !$user['isAdmin']) {
-  echo "<div style='color:red; text-align:center;'>🚫 Bạn không có quyền gửi nhắc nợ.</div>";
+  echo "<div style='color:red; text-align:center;'>Bạn không có quyền gửi nhắc nợ.</div>";
   exit();
 }
 
@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $userEmail = ($result->num_rows > 0) ? $result->fetch_assoc()['email'] : null;
 
   if (!$userEmail) {
-    echo "<div style='color:red; text-align:center;'>⚠️ Không tìm thấy email của đoàn viên <b>$payer_name</b>.</div>";
+    echo "<div style='color:red; text-align:center;'>Không tìm thấy email của đoàn viên <b>$payer_name</b>.</div>";
     exit();
   }
 
@@ -45,8 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'YOUR_GMAIL@gmail.com';  // 📧 Thay bằng Gmail của bạn
-    $mail->Password = 'YOUR_APP_PASSWORD';     // 🔑 Thay bằng App Password (16 ký tự)
+    $mail->Username = 'YOUR_GMAIL@gmail.com';  // Thay bằng Gmail của bạn
+    $mail->Password = 'YOUR_APP_PASSWORD';     // Thay bằng App Password (16 ký tự)
     $mail->SMTPSecure = 'tls';
     $mail->Port = 587;
     $mail->CharSet = 'UTF-8';
@@ -71,8 +71,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     echo "
       <div style='text-align:center; color:#27ae60;'>
-        ✅ Đã gửi nhắc nợ thành công tới <b>$payer_name</b> ($userEmail)
-        <br><a href='manage_transactions.php' style='color:#0984e3;'>⬅️ Quay lại</a>
+        Đã gửi nhắc nợ thành công tới <b>$payer_name</b> ($userEmail)
+        <br><a href='manage_transactions.php' style='color:#0984e3;'>Quay lại</a>
       </div>
     ";
   } catch (Exception $e) {
@@ -84,6 +84,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     ";
   }
 } else {
-  echo "<div style='text-align:center;'>⚠️ Không có dữ liệu được gửi.</div>";
+  echo "<div style='text-align:center;'>Không có dữ liệu được gửi.</div>";
 }
 ?>

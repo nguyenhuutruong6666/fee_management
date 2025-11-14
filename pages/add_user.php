@@ -6,7 +6,7 @@ include("../config/db.php");
 
 // Chỉ cho phép Admin truy cập
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
-    echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+    echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
     include("../includes/footer.php");
     exit();
 }
@@ -37,9 +37,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $checkResult = $check->get_result();
 
     if ($checkResult->num_rows > 0) {
-        $message = "<p class='error'>⚠️ Email hoặc mã SV/CCCD đã tồn tại trong hệ thống!</p>";
+        $message = "<p class='error'>Email hoặc mã SV/CCCD đã tồn tại trong hệ thống!</p>";
     } elseif (empty($userName) || empty($fullName) || empty($email) || empty($role_id) || empty($unit)) {
-        $message = "<p class='error'>⚠️ Vui lòng điền đầy đủ thông tin bắt buộc.</p>";
+        $message = "<p class='error'>Vui lòng điền đầy đủ thông tin bắt buộc.</p>";
     } else {
         // Thêm người dùng mới
         $stmt = $conn->prepare("
@@ -55,10 +55,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // Gán vai trò cho người dùng mới
             $conn->query("INSERT INTO user_role (user_id, role_id, createdAt) VALUES ($newUserId, $role_id, NOW())");
 
-            echo "<script>alert('✅ Tạo tài khoản thành công!'); window.location.href='users.php';</script>";
+            echo "<script>alert('Tạo tài khoản thành công!'); window.location.href='users.php';</script>";
             exit();
         } else {
-            $message = "<p class='error'>❌ Lỗi khi tạo tài khoản. Vui lòng thử lại.</p>";
+            $message = "<p class='error'>Lỗi khi tạo tài khoản. Vui lòng thử lại.</p>";
         }
         $stmt->close();
     }
@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 ?>
 
 <div class="container">
-  <h2>➕ Thêm người dùng mới</h2>
+  <h2>Thêm người dùng mới</h2>
   <?= $message ?>
 
   <form method="POST" class="form-add">
@@ -137,8 +137,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn-save">💾 Lưu</button>
-      <a href="users.php" class="btn-back">⬅️ Quay lại</a>
+      <button type="submit" class="btn-save">Lưu</button>
+      <a href="users.php" class="btn-back">Quay lại</a>
     </div>
   </form>
 </div>

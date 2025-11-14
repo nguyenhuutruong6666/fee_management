@@ -6,7 +6,7 @@ include("../config/db.php");
 
 // Chỉ Admin mới được vào
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
-    echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+    echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
     include("../includes/footer.php");
     exit();
 }
@@ -30,8 +30,8 @@ $result = $conn->query($sql);
   <h2>👥 Quản lý người dùng</h2>
 
   <div class="actions">
-    <a href="add_user.php" class="btn-add">➕ Thêm người dùng</a>
-    <a href="import_users.php" class="btn-import">📂 Import danh sách</a>
+    <a href="add_user.php" class="btn-add">Thêm người dùng</a>
+    <a href="import_users.php" class="btn-import">Import danh sách</a>
   </div>
 
   <table class="table">

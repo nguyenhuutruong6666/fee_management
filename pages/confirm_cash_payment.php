@@ -18,7 +18,7 @@ $message = "";
 
 //Chỉ BCH Chi đoàn được vào
 if (!in_array($user_role, ['BCH Chi đoàn']) && ($user['isAdmin'] ?? 0) != 1) {
-  echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+  echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
   exit();
 }
@@ -58,9 +58,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['payment_id'])) {
       FROM fee_payment WHERE id=$payment_id
     ");
 
-    $message = "<p class='success'>✅ Đã xác nhận đoàn viên nộp tiền mặt thành công (Mã giao dịch: <strong>$txn</strong>).</p>";
+    $message = "<p class='success'>Đã xác nhận đoàn viên nộp tiền mặt thành công (Mã giao dịch: <strong>$txn</strong>).</p>";
   } else {
-    $message = "<p class='error'>⚠️ Giao dịch không hợp lệ hoặc đã được xác nhận trước đó!</p>";
+    $message = "<p class='error'>Giao dịch không hợp lệ hoặc đã được xác nhận trước đó!</p>";
   }
 }
 
@@ -96,7 +96,7 @@ $list = $conn->query($sql);
 ?>
 
 <div class="container">
-  <h2>🧾 Xác nhận đoàn viên đã nộp tiền mặt</h2>
+  <h2>Xác nhận đoàn viên đã nộp tiền mặt</h2>
   <?= $message ?>
 
   <?php if ($list && $list->num_rows > 0): ?>
@@ -132,7 +132,7 @@ $list = $conn->query($sql);
         <td>
           <form method="POST" onsubmit="return confirm('Bạn có chắc muốn xác nhận đoàn viên này đã nộp tiền mặt?');">
             <input type="hidden" name="payment_id" value="<?= $r['payment_id'] ?>">
-            <button type="submit" class="btn-confirm">✅ Xác nhận</button>
+            <button type="submit" class="btn-confirm">Xác nhận</button>
           </form>
         </td>
       </tr>
@@ -140,7 +140,7 @@ $list = $conn->query($sql);
     </tbody>
   </table>
   <?php else: ?>
-    <p>✅ Hiện không có đoàn viên nào đang chờ xác nhận.</p>
+    <p>Hiện không có đoàn viên nào đang chờ xác nhận.</p>
   <?php endif; ?>
 </div>
 

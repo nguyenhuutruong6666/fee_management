@@ -23,25 +23,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dbUser = $result->fetch_assoc();
 
     if (!$dbUser) {
-        $message = "<p class='error'>❌ Không tìm thấy tài khoản.</p>";
+        $message = "<p class='error'>Không tìm thấy tài khoản.</p>";
     } elseif ($old !== $dbUser['password']) {
-        $message = "<p class='error'>⚠️ Mật khẩu hiện tại không đúng.</p>";
+        $message = "<p class='error'>Mật khẩu hiện tại không đúng.</p>";
     } elseif (strlen($new) < 6) {
-        $message = "<p class='error'>⚠️ Mật khẩu mới phải có ít nhất 6 ký tự.</p>";
+        $message = "<p class='error'>Mật khẩu mới phải có ít nhất 6 ký tự.</p>";
     } elseif ($new === $old) {
-        $message = "<p class='error'>⚠️ Mật khẩu mới không được trùng với mật khẩu cũ.</p>";
+        $message = "<p class='error'>Mật khẩu mới không được trùng với mật khẩu cũ.</p>";
     } elseif ($new !== $confirm) {
-        $message = "<p class='error'>⚠️ Mật khẩu xác nhận không khớp.</p>";
+        $message = "<p class='error'>Mật khẩu xác nhận không khớp.</p>";
     } else {
         // Cập nhật mật khẩu mới
         $conn->query("UPDATE users SET password='$new' WHERE userId = {$user['userId']}");
-        $message = "<p class='success'>✅ Đổi mật khẩu thành công!</p>";
+        $message = "<p class='success'>Đổi mật khẩu thành công!</p>";
     }
 }
 ?>
 
 <div class="container">
-  <h2>🔑 Đổi mật khẩu</h2>
+  <h2>Đổi mật khẩu</h2>
   <div class="password-box">
     <?= $message ?>
     <form method="POST">

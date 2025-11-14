@@ -6,7 +6,7 @@ include("../config/db.php");
 
 //Chỉ cho phép quản trị viên
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
-  echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập chức năng này.</p></div>";
+  echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập chức năng này.</p></div>";
   include("../includes/footer.php");
   exit();
 }
@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $run_by = $_SESSION['user']['userId'];
 
   if (empty($cycle_label) || $policy_id <= 0) {
-    $message = "<p class='error'>⚠️ Vui lòng chọn chính sách và nhập nhãn chu kỳ hợp lệ!</p>";
+    $message = "<p class='error'>Vui lòng chọn chính sách và nhập nhãn chu kỳ hợp lệ!</p>";
   } else {
     //Lấy chính sách đang kích hoạt
     $stmt = $conn->prepare("SELECT * FROM fee_policy WHERE id=? AND status='Active' LIMIT 1");
@@ -32,12 +32,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $policy = $stmt->get_result()->fetch_assoc();
 
     if (!$policy) {
-      $message = "<p class='error'>❌ Không tìm thấy chính sách đoàn phí đang kích hoạt.</p>";
+      $message = "<p class='error'>Không tìm thấy chính sách đoàn phí đang kích hoạt.</p>";
     } else {
       //Lấy quy tắc miễn giảm
       $rules = [];
       $rquery = $conn->prepare("SELECT role_name, amount FROM fee_policy_rule WHERE policy_id=?");
-      if (!$rquery) die("❌ SQL Error (rule): " . $conn->error);
+      if (!$rquery) die("SQL Error (rule): " . $conn->error);
       $rquery->bind_param("i", $policy_id);
       $rquery->execute();
       $rresult = $rquery->get_result();
@@ -54,10 +54,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         WHERE r.role_name IN ('Đoàn viên', 'BCH Trường', 'BCH Khoa', 'BCH Chi đoàn')
       ";
       $users = $conn->query($sql_users);
-      if (!$users) die("❌ SQL Error (users): " . $conn->error);
+      if (!$users) die("SQL Error (users): " . $conn->error);
 
       if ($users->num_rows == 0) {
-        $message = "<p class='error'>⚠️ Không có đoàn viên nào trong hệ thống.</p>";
+        $message = "<p class='error'>Không có đoàn viên nào trong hệ thống.</p>";
       } else {
         //Tính hạn nộp theo chu kỳ
         if (!empty($policy['due_date'])) {
@@ -93,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
           // Kiểm tra trùng kỳ
           $check = $conn->prepare("SELECT id FROM fee_obligation WHERE user_id=? AND period_label=? LIMIT 1");
-          if (!$check) die("❌ SQL Error (check): " . $conn->error);
+          if (!$check) die("SQL Error (check): " . $conn->error);
           $check->bind_param("is", $u['userId'], $cycle_label);
           $check->execute();
           $exists = $check->get_result()->num_rows > 0;
@@ -129,13 +129,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           INSERT INTO fee_generation_log (policy_id, run_by, cycle_label, total_success, total_failed, run_time, note)
           VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
-        if (!$log) die("❌ SQL Error (log): " . $conn->error);
+        if (!$log) die("SQL Error (log): " . $conn->error);
         $log->bind_param("iisiiis", $policy_id, $run_by, $cycle_label, $total_success, $total_failed, $log_time, $note);
         $log->execute();
 
-        $message = "<p class='success'>✅ Sinh nghĩa vụ đoàn phí thành công!<br>
-        ✔️ $total_success thành công — ⚠️ $total_failed lỗi<br>
-        🕒 Ghi log: $log_time</p>";
+        $message = "<p class='success'>Sinh nghĩa vụ đoàn phí thành công!<br>
+        $total_success thành công — $total_failed lỗi<br>
+        Ghi log: $log_time</p>";
       }
     }
   }
@@ -146,7 +146,7 @@ $policies = $conn->query("SELECT id, policy_name, cycle, standard_amount FROM fe
 ?>
 
 <div class="container">
-  <h2>⚙️ Sinh nghĩa vụ đoàn phí theo kỳ</h2>
+  <h2>Sinh nghĩa vụ đoàn phí theo kỳ</h2>
   <?= $message ?>
 
   <form method="POST" class="form-generate">
@@ -163,13 +163,13 @@ $policies = $conn->query("SELECT id, policy_name, cycle, standard_amount FROM fe
     </div>
 
     <div class="form-group">
-      <label>Nhập nhãn chu kỳ (VD: 01/2025):</label>
-      <input type="text" name="cycle_label" placeholder="VD: 01/2025 hoặc HK1/2025" required>
+      <label>Nhập nhãn chu kỳ:</label>
+      <input type="text" name="cycle_label" placeholder="VD: HK1/2025" required>
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn-generate">⚡ Sinh nghĩa vụ</button>
-      <a href="dashboard.php" class="btn-back">⬅️ Quay lại</a>
+      <button type="submit" class="btn-generate">Sinh nghĩa vụ</button>
+      <a href="dashboard.php" class="btn-back">Quay lại</a>
     </div>
   </form>
 </div>

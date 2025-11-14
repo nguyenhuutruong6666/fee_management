@@ -11,18 +11,18 @@ $user = $_SESSION['user'];
 ?>
 
 <div class="container">
-  <h1>🏠 Trang chính</h1>
+  <h1>Trang chính</h1>
   <p>Chào mừng <?= htmlspecialchars($user['fullName']) ?> đến với hệ thống quản lý đoàn phí!</p>
 
   <div class="actions">
     <?php if (!$user['isAdmin']): ?>
-      <a href="pay_fee.php" class="btn-pay">💰 Nộp đoàn phí</a>
+      <a href="pay_fee.php" class="btn-pay">Nộp đoàn phí</a>
     <?php endif; ?>
 
     <?php if ($user['isAdmin']): ?>
-      <a href="manage_transactions.php" class="btn-view">📜 Xem giao dịch đoàn phí</a>
-      <a href="policy_settings.php" class="btn-policy">⚙️ Thiết lập chính sách đoàn phí</a>
-      <a href="generate_fee_obligation.php" class="btn-policy">⚙️ Sinh nghĩa vụ đoàn phí</a>
+      <a href="manage_transactions.php" class="btn-view">Xem giao dịch đoàn phí</a>
+      <a href="policy_settings.php" class="btn-policy">Thiết lập chính sách đoàn phí</a>
+      <a href="generate_fee_obligation.php" class="btn-policy">Sinh nghĩa vụ đoàn phí</a>
     <?php endif; ?>
   </div>
 </div>

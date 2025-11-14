@@ -6,7 +6,7 @@ include("../config/db.php");
 
 // Chỉ admin mới có quyền
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
-  echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+  echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
   exit();
 }
@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $parent_id = !empty($_POST['parent_id']) ? intval($_POST['parent_id']) : NULL;
 
   if (empty($unit_name)) {
-    $message = "<p class='error'>⚠️ Vui lòng nhập tên đơn vị.</p>";
+    $message = "<p class='error'>Vui lòng nhập tên đơn vị.</p>";
   } else {
     //Kiểm tra xem tên đơn vị đã tồn tại chưa (không phân biệt hoa/thường)
     $check = $conn->prepare("SELECT id FROM organization_units WHERE LOWER(unit_name) = LOWER(?)");
@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $result = $check->get_result();
 
     if ($result->num_rows > 0) {
-      $message = "<p class='error'>🚫 Tên đơn vị <b>'" . htmlspecialchars($unit_name) . "'</b> đã tồn tại. Vui lòng chọn tên khác.</p>";
+      $message = "<p class='error'>Tên đơn vị <b>'" . htmlspecialchars($unit_name) . "'</b> đã tồn tại. Vui lòng chọn tên khác.</p>";
     } else {
       // Thêm mới
       $stmt = $conn->prepare("INSERT INTO organization_units (unit_name, unit_level, parent_id) VALUES (?, ?, ?)");
@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         header("Location: units.php");
         exit();
       } else {
-        $message = "<p class='error'>❌ Lỗi khi thêm đơn vị mới: " . $conn->error . "</p>";
+        $message = "<p class='error'>Lỗi khi thêm đơn vị mới: " . $conn->error . "</p>";
       }
       $stmt->close();
     }
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 ?>
 
 <div class="container">
-  <h2>➕ Thêm đơn vị mới</h2>
+  <h2>Thêm đơn vị mới</h2>
   <?= $message ?>
 
   <form method="POST" class="form-add">
@@ -76,8 +76,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <?php endif; ?>
 
     <div class="form-actions">
-      <button type="submit" class="btn-save">💾 Lưu</button>
-      <a href="units.php" class="btn-back">⬅️ Quay lại</a>
+      <button type="submit" class="btn-save">Lưu</button>
+      <a href="units.php" class="btn-back">Quay lại</a>
     </div>
   </form>
 </div>

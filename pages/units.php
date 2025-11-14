@@ -6,7 +6,7 @@ include("../config/db.php");
 
 // Kiểm tra quyền truy cập (chỉ Admin)
 if (!isset($_SESSION['user']) || $_SESSION['user']['isAdmin'] != 1) {
-  echo "<div class='container'><p style='color:red;'>🚫 Bạn không có quyền truy cập trang này.</p></div>";
+  echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
   exit();
 }
@@ -64,10 +64,10 @@ function renderTree($conn, $parent_id = NULL, $level = 0) {
 ?>
 
 <div class="container">
-  <h2>🏫 Cấu hình tổ chức</h2>
+  <h2>Cấu hình tổ chức</h2>
 
   <div class="actions">
-    <a href="add_unit.php?next=Truong" class="btn-add">➕ Thêm Trường</a>
+    <a href="add_unit.php?next=Truong" class="btn-add">Thêm Trường</a>
   </div>
 
   <div class="tree-container">
