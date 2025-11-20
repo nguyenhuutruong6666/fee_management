@@ -12,24 +12,21 @@ if (!isset($_SESSION['user'])) {
 
 $user = $_SESSION['user'];
 $user_id = $user['userId'];
-$user_role = $user['role_name'] ?? 'Đoàn viên'; //Lấy trực tiếp từ session
+$user_role = $user['role_name'] ?? 'Đoàn viên';
 $message = "";
-
 
 //XỬ LÝ NỘP TIỀN
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['obligation_id'])) {
   $obligation_id = intval($_POST['obligation_id']);
   $method = $_POST['method'] ?? '';
-  $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
+  $amount = floatval($_POST['amount'] ?? 0);
   $reference = $_POST['reference'] ?? '';
   $collector_id = ($user['isAdmin'] ?? 0) ? $user_id : NULL;
 
-  //Kiểm tra xem đã có mã giao dịch chưa (tránh sinh trùng)
+  // Kiểm tra trùng giao dịch
   $check = $conn->prepare("
-    SELECT transaction_code, status 
-    FROM fee_payment 
-    WHERE obligation_id=? AND payer_id=? AND payment_method=? 
-    LIMIT 1
+    SELECT transaction_code FROM fee_payment 
+    WHERE obligation_id=? AND payer_id=? AND payment_method=? LIMIT 1
   ");
   $check->bind_param("iis", $obligation_id, $user_id, $method);
   $check->execute();
@@ -48,14 +45,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['obligation_id'])) {
     $stmt->execute();
   }
 
-  //NỘP TIỀN MẶT
+  // Nộp tiền mặt
   if ($method === 'Cash') {
-    // BCH hoặc Admin -> xác nhận ngay
     if (in_array($user_role, ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn']) || ($user['isAdmin'] ?? 0) == 1) {
       $conn->query("UPDATE fee_payment SET status='Success' WHERE transaction_code='$transaction_code'");
       $conn->query("UPDATE fee_obligation SET status='Đã nộp' WHERE id=$obligation_id");
 
-      // Sinh biên lai điện tử và ghi vào sổ quỹ
       $conn->query("
         INSERT INTO fee_receipt (payment_id, receipt_code, issued_by, amount)
         SELECT id, CONCAT('RC-', id, '-', YEAR(NOW())), $user_id, amount 
@@ -68,13 +63,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['obligation_id'])) {
       ");
       $message = "<p class='success'>Nộp tiền mặt thành công! (BCH xác nhận tự động)</p>";
     } else {
-      // Đoàn viên thường -> chờ BCH xác nhận
       $conn->query("UPDATE fee_payment SET status='Pending' WHERE transaction_code='$transaction_code'");
       $message = "<p class='success'>Đã ghi nhận nộp tiền mặt. Đang chờ BCH Chi đoàn xác nhận.</p>";
     }
   }
 
-  //NỘP QUA VIETQR
+  // Nộp VietQR
   if ($method === 'VietQR') {
     $_SESSION['qr_transaction'] = [
       'obligation_id' => $obligation_id,
@@ -87,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['obligation_id'])) {
   }
 }
 
-//XÁC NHẬN CHUYỂN KHOẢN
+// Xác nhận chuyển khoản
 if (isset($_POST['confirm_transfer'])) {
   $obligation_id = intval($_POST['obligation_id']);
   $transaction_code = $_POST['transaction_code'];
@@ -95,7 +89,6 @@ if (isset($_POST['confirm_transfer'])) {
   $conn->query("UPDATE fee_payment SET status='Success' WHERE transaction_code='$transaction_code'");
   $conn->query("UPDATE fee_obligation SET status='Đã nộp' WHERE id=$obligation_id");
 
-  // Sinh biên lai và ghi vào sổ quỹ
   $conn->query("
     INSERT INTO fee_receipt (payment_id, receipt_code, issued_by, amount)
     SELECT id, CONCAT('RC-', id, '-', YEAR(NOW())), $user_id, amount 
@@ -109,8 +102,7 @@ if (isset($_POST['confirm_transfer'])) {
   $message = "<p class='success'>Xác nhận chuyển khoản thành công!</p>";
 }
 
-
-//LẤY DANH SÁCH NGHĨA VỤ CHƯA NỘP
+//LẤY DANH SÁCH NGHĨA VỤ
 $sql = "
   SELECT o.id, o.period_label, o.amount, o.status, o.due_date, o.reference_code, p.policy_name
   FROM fee_obligation o
@@ -125,18 +117,18 @@ $obligations = $conn->query($sql);
   <h2>Nghĩa vụ đoàn phí của bạn</h2>
   <?= $message ?>
 
-  <!-- Nút cho BCH / Admin -->
   <?php if (in_array($user_role, ['BCH Chi đoàn']) || ($user['isAdmin'] ?? 0) == 1): ?>
     <div style="text-align:right; margin-bottom:15px;">
       <a href="confirm_cash_payment.php" class="btn-manage">Trang xác nhận tiền mặt (BCH)</a>
+      <a href="remind_debtors.php" class="btn-remind">Nhắc nợ đoàn viên</a>
     </div>
   <?php endif; ?>
 
   <?php 
-  //HIỂN THỊ QR
+  // HIỂN THỊ QR
   if (isset($_GET['show_qr']) && isset($_SESSION['qr_transaction'])): 
     $txn = $_SESSION['qr_transaction'];
-    $bank = "970436"; // Vietcombank
+    $bank = "970436";
     $accountNo = "0385672224";
     $accountName = "Nguyen Huu Truong";
     $amount = $txn['amount'];
@@ -145,11 +137,10 @@ $obligations = $conn->query($sql);
     $qrText = "https://img.vietqr.io/image/$bank-$accountNo-compact2.png?amount=$amount&addInfo=$ref&accountName=$accountName";
   ?>
     <div class="qr-box">
-      <h3>Quét mã VietQR để nộp đoàn phí</h3>
+      <h3>📱 Quét mã VietQR để nộp đoàn phí</h3>
       <p><strong>Số tiền:</strong> <?= number_format($amount, 0, ',', '.') ?>đ</p>
       <img src="<?= htmlspecialchars($qrText) ?>" alt="VietQR" class="qr-image">
       <p><strong>Nội dung chuyển khoản:</strong> <?= htmlspecialchars($ref) ?></p>
-
       <form method="POST" style="margin-top:15px;">
         <input type="hidden" name="obligation_id" value="<?= $obligation_id ?>">
         <input type="hidden" name="transaction_code" value="<?= $txn['transaction_code'] ?>">
@@ -161,11 +152,18 @@ $obligations = $conn->query($sql);
 
   <?php if ($obligations->num_rows > 0): ?>
     <div class="obligation-list">
-      <?php while ($o = $obligations->fetch_assoc()): ?>
+      <?php while ($o = $obligations->fetch_assoc()): 
+        $isOverdue = strtotime($o['due_date']) < strtotime(date('Y-m-d')); // Kiểm tra quá hạn
+      ?>
         <div class="obligation-card">
           <h3><?= htmlspecialchars($o['policy_name']) ?></h3>
           <p>Chu kỳ: <strong><?= $o['period_label'] ?></strong></p>
-          <p>Hạn nộp: <?= date("d/m/Y", strtotime($o['due_date'])) ?></p>
+          <p>
+            Hạn nộp: <?= date("d/m/Y", strtotime($o['due_date'])) ?>
+            <?php if ($isOverdue): ?>
+              <span class="overdue">⚠️ Bạn đã quá hạn nộp</span>
+            <?php endif; ?>
+          </p>
           <p>Số tiền: <strong><?= number_format($o['amount'], 0, ',', '.') ?>đ</strong></p>
           <p>Mã tham chiếu: <strong><?= htmlspecialchars($o['reference_code']) ?></strong></p>
 
@@ -203,6 +201,9 @@ h2 { text-align:center; color:#2d3436; margin-bottom:25px; }
 .btn-back { display:inline-block; padding:8px 15px; background:#b2bec3; color:white; border-radius:8px; text-decoration:none; }
 .success { color:#27ae60; font-weight:bold; text-align:center; }
 .error { color:#d63031; font-weight:bold; text-align:center; }
+.overdue { color:#d63031; font-weight:bold; margin-left:5px; }
+.btn-remind { background:#e67e22; color:white; padding:8px 14px; text-decoration:none; border-radius:6px; font-weight:600; margin-left:10px; }
+.btn-remind:hover { background:#d35400; }
 </style>
 
 <?php include("../includes/footer.php"); ?>

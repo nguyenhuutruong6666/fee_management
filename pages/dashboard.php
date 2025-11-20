@@ -8,6 +8,10 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
+// $user_id = $user['userId'];
+$user_role = $user['role_name'] ?? '';
+// $unit_type = $user['unit_type'] ?? '';
+// $unit_id = $user['unit_id'] ?? 0;
 ?>
 
 <div class="container">
@@ -17,6 +21,14 @@ $user = $_SESSION['user'];
   <div class="actions">
     <?php if (!$user['isAdmin']): ?>
       <a href="pay_fee.php" class="btn-pay">Nộp đoàn phí</a>
+    <?php endif; ?>
+
+    <?php if (in_array($user_role, ['BCH Chi đoàn', 'BCH Khoa'])): ?>
+      <a href="activity_proposal.php" class="btn-pay">Đề xuất hoạt động</a>
+    <?php endif; ?>
+
+    <?php if (in_array($user_role, ['BCH Trường', 'BCH Khoa'])): ?>
+      <a href="activity_approval.php" class="btn-pay">Phê duyệt hoạt động</a>
     <?php endif; ?>
 
     <?php if ($user['isAdmin']): ?>
@@ -62,7 +74,7 @@ p {
   transition: all 0.3s ease;
 }
 
-/* 💰 Nộp đoàn phí */
+/* Nộp đoàn phí */
 .btn-pay {
   background: linear-gradient(135deg, #00b894, #00cec9);
   color: white;
@@ -73,7 +85,7 @@ p {
   box-shadow: 0 6px 14px rgba(0, 206, 201, 0.4);
 }
 
-/* 📜 Xem giao dịch */
+/* Xem giao dịch */
 .btn-view {
   background: linear-gradient(135deg, #0984e3, #74b9ff);
   color: white;
@@ -84,7 +96,7 @@ p {
   box-shadow: 0 6px 14px rgba(9, 132, 227, 0.4);
 }
 
-/* ⚙️ Thiết lập chính sách đoàn phí */
+/* Thiết lập chính sách đoàn phí */
 .btn-policy {
   background: linear-gradient(135deg, #6c5ce7, #a29bfe);
   color: white;
