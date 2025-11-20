@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th10 20, 2025 lúc 07:28 PM
+-- Thời gian đã tạo: Th10 20, 2025 lúc 07:35 PM
 -- Phiên bản máy phục vụ: 10.4.11-MariaDB
 -- Phiên bản PHP: 7.4.4
 
@@ -111,6 +111,83 @@ INSERT INTO `activity_proposal` (`id`, `title`, `content`, `estimated_budget`, `
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `fee_allocation_detail`
+--
+
+CREATE TABLE `fee_allocation_detail` (
+  `id` int(11) NOT NULL,
+  `voucher_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `obligation_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `fee_allocation_voucher`
+--
+
+CREATE TABLE `fee_allocation_voucher` (
+  `id` int(11) NOT NULL,
+  `period_label` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unit_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unit_id` int(11) NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `chi_doan_keep` decimal(10,2) DEFAULT 0.00,
+  `khoa_keep` decimal(10,2) DEFAULT 0.00,
+  `truong_keep` decimal(10,2) DEFAULT 0.00,
+  `transferred_to_unit` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `transferred_amount` decimal(10,2) DEFAULT NULL,
+  `transfer_date` datetime DEFAULT NULL,
+  `status` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'Chờ phân bổ',
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `fee_approval`
+--
+
+CREATE TABLE `fee_approval` (
+  `id` int(11) NOT NULL,
+  `period_label` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unit_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unit_id` int(11) NOT NULL,
+  `approved_by` int(11) DEFAULT NULL,
+  `approved_at` datetime DEFAULT NULL,
+  `status` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'Chờ duyệt',
+  `note` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `fee_approval_log`
+--
+
+CREATE TABLE `fee_approval_log` (
+  `id` int(11) NOT NULL,
+  `period_label` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `from_unit_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `from_unit_id` int(11) DEFAULT NULL,
+  `to_unit_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `to_unit_id` int(11) DEFAULT NULL,
+  `sent_by` int(11) NOT NULL,
+  `sent_at` datetime DEFAULT current_timestamp(),
+  `status` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'Đã gửi',
+  `note` text COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `fee_cashbook`
 --
 
@@ -125,6 +202,44 @@ CREATE TABLE `fee_cashbook` (
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `fee_cashbook_unit`
+--
+
+CREATE TABLE `fee_cashbook_unit` (
+  `id` int(11) NOT NULL,
+  `unit_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unit_id` int(11) NOT NULL,
+  `transaction_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `transaction_date` datetime DEFAULT current_timestamp(),
+  `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `related_voucher_id` int(11) DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `recorded_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `fee_distribution_ratio`
+--
+
+CREATE TABLE `fee_distribution_ratio` (
+  `id` int(11) NOT NULL,
+  `effective_from` date NOT NULL,
+  `effective_to` date DEFAULT NULL,
+  `chi_doan_ratio` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `khoa_ratio` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `truong_ratio` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -940,12 +1055,57 @@ ALTER TABLE `activity_proposal`
   ADD KEY `fk_approver` (`approved_by`);
 
 --
+-- Chỉ mục cho bảng `fee_allocation_detail`
+--
+ALTER TABLE `fee_allocation_detail`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_detail_voucher` (`voucher_id`),
+  ADD KEY `fk_detail_user` (`user_id`),
+  ADD KEY `fk_detail_obligation` (`obligation_id`);
+
+--
+-- Chỉ mục cho bảng `fee_allocation_voucher`
+--
+ALTER TABLE `fee_allocation_voucher`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_allocation_createdby` (`created_by`);
+
+--
+-- Chỉ mục cho bảng `fee_approval`
+--
+ALTER TABLE `fee_approval`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_feeapproval_approver` (`approved_by`);
+
+--
+-- Chỉ mục cho bảng `fee_approval_log`
+--
+ALTER TABLE `fee_approval_log`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_feeapprovallog_sender` (`sent_by`);
+
+--
 -- Chỉ mục cho bảng `fee_cashbook`
 --
 ALTER TABLE `fee_cashbook`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_cashbook_payment` (`payment_id`),
   ADD KEY `fk_cashbook_user` (`recorded_by`);
+
+--
+-- Chỉ mục cho bảng `fee_cashbook_unit`
+--
+ALTER TABLE `fee_cashbook_unit`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_cashbook_voucher` (`related_voucher_id`),
+  ADD KEY `fk_cashbook_recorder` (`recorded_by`);
+
+--
+-- Chỉ mục cho bảng `fee_distribution_ratio`
+--
+ALTER TABLE `fee_distribution_ratio`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_distribution_creator` (`created_by`);
 
 --
 -- Chỉ mục cho bảng `fee_generation_log`
@@ -1064,10 +1224,46 @@ ALTER TABLE `activity_proposal`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT cho bảng `fee_allocation_detail`
+--
+ALTER TABLE `fee_allocation_detail`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `fee_allocation_voucher`
+--
+ALTER TABLE `fee_allocation_voucher`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `fee_approval`
+--
+ALTER TABLE `fee_approval`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `fee_approval_log`
+--
+ALTER TABLE `fee_approval_log`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `fee_cashbook`
 --
 ALTER TABLE `fee_cashbook`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT cho bảng `fee_cashbook_unit`
+--
+ALTER TABLE `fee_cashbook_unit`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `fee_distribution_ratio`
+--
+ALTER TABLE `fee_distribution_ratio`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `fee_generation_log`
@@ -1166,11 +1362,50 @@ ALTER TABLE `activity_proposal`
   ADD CONSTRAINT `fk_proposer` FOREIGN KEY (`proposer_id`) REFERENCES `users` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Các ràng buộc cho bảng `fee_allocation_detail`
+--
+ALTER TABLE `fee_allocation_detail`
+  ADD CONSTRAINT `fk_detail_obligation` FOREIGN KEY (`obligation_id`) REFERENCES `fee_obligation` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_detail_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_detail_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `fee_allocation_voucher` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `fee_allocation_voucher`
+--
+ALTER TABLE `fee_allocation_voucher`
+  ADD CONSTRAINT `fk_allocation_createdby` FOREIGN KEY (`created_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `fee_approval`
+--
+ALTER TABLE `fee_approval`
+  ADD CONSTRAINT `fk_feeapproval_approver` FOREIGN KEY (`approved_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `fee_approval_log`
+--
+ALTER TABLE `fee_approval_log`
+  ADD CONSTRAINT `fk_feeapprovallog_sender` FOREIGN KEY (`sent_by`) REFERENCES `users` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Các ràng buộc cho bảng `fee_cashbook`
 --
 ALTER TABLE `fee_cashbook`
   ADD CONSTRAINT `fk_cashbook_payment` FOREIGN KEY (`payment_id`) REFERENCES `fee_payment` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_cashbook_user` FOREIGN KEY (`recorded_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL;
+
+--
+-- Các ràng buộc cho bảng `fee_cashbook_unit`
+--
+ALTER TABLE `fee_cashbook_unit`
+  ADD CONSTRAINT `fk_cashbook_recorder` FOREIGN KEY (`recorded_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_cashbook_voucher` FOREIGN KEY (`related_voucher_id`) REFERENCES `fee_allocation_voucher` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `fee_distribution_ratio`
+--
+ALTER TABLE `fee_distribution_ratio`
+  ADD CONSTRAINT `fk_distribution_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `fee_generation_log`
