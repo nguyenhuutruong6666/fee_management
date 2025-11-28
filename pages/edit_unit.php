@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <input type="text" name="unit_name" value="<?= htmlspecialchars($unit['unit_name']) ?>" required>
     </div>
 
-    <div class="form-group">
+    <!-- <div class="form-group">
       <label>Bí thư:</label>
       <input type="number" name="leader_id" value="<?= $unit['leader_id'] ?? '' ?>" placeholder="Nhập ID người dùng">
     </div>
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="form-group">
       <label>Phó Bí thư:</label>
       <input type="number" name="deputy_id" value="<?= $unit['deputy_id'] ?? '' ?>" placeholder="Nhập ID người dùng">
-    </div>
+    </div> -->
 
     <button type="submit" class="btn-save">Lưu</button>
     <a href="units.php" class="btn-back">Quay lại</a>

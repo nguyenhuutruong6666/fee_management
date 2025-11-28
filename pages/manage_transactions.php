@@ -13,29 +13,28 @@ $user = $_SESSION['user'];
 $role_name = $user['role_name'] ?? '';
 $user_id = $user['userId'];
 $user_unit = $user['unit'] ?? '';
+$isAdmin = $user['isAdmin'] ?? 0;
 $message = "";
 
-//Chỉ BCH và Admin được phép vào
+// Kiểm tra quyền truy cập
 $allowed_roles = ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'];
-if (!in_array($role_name, $allowed_roles) && !$user['isAdmin']) {
+if (!in_array($role_name, $allowed_roles) && !$isAdmin) {
   echo "<div class='container'><p style='color:red;'>Bạn không có quyền truy cập trang này.</p></div>";
   include("../includes/footer.php");
   exit();
 }
 
-
-//CẬP NHẬT TRẠNG THÁI GIAO DỊCH
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id']) && isset($_POST['status'])) {
+//CẬP NHẬT TRẠNG THÁI
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id']) && isset($_POST['status']) && $isAdmin) {
   $payment_id = intval($_POST['payment_id']);
   $new_status = $_POST['status'];
-  $note = trim($_POST['note'] ?? '');
 
   $res = $conn->query("SELECT * FROM fee_payment WHERE id=$payment_id");
   $payment = $res->fetch_assoc();
 
   if ($payment) {
-    $stmt = $conn->prepare("UPDATE fee_payment SET status=?, note=? WHERE id=?");
-    $stmt->bind_param("ssi", $new_status, $note, $payment_id);
+    $stmt = $conn->prepare("UPDATE fee_payment SET status=? WHERE id=?");
+    $stmt->bind_param("si", $new_status, $payment_id);
     $stmt->execute();
 
     if ($new_status === 'Success') {
@@ -63,30 +62,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id']) && isse
   }
 }
 
+//XỬ LÝ TÌM KIẾM
+$search_name = trim($_GET['search'] ?? "");
 
-//LỌC DANH SÁCH GIAO DỊCH THEO QUYỀN
+//TRUY VẤN DANH SÁCH
 $sql = "
   SELECT 
-    p.id, p.transaction_code, p.payment_method, p.amount, p.status, p.note, p.payment_date,
-    u.fullName AS payer_name, u.unit AS payer_unit, o.period_label, o.status AS obligation_status
+    p.id, p.transaction_code, p.payment_method, p.amount, p.status, p.payment_date,
+    u.fullName AS payer_name, o.period_label,
+    ou.unit_name AS payer_unit
   FROM fee_payment p
   JOIN users u ON p.payer_id = u.userId
   JOIN fee_obligation o ON p.obligation_id = o.id
-  LEFT JOIN user_role ur ON u.userId = ur.user_id
-  LEFT JOIN role r ON ur.role_id = r.id
+  LEFT JOIN organization_units ou ON u.unit = ou.id
   WHERE 1
 ";
 
-//Admin & BCH Trường → thấy tất cả
-if (!$user['isAdmin'] && $role_name !== 'BCH Trường') {
-  //BCH Khoa → thấy đoàn viên và BCH Chi đoàn cùng khoa
-  if ($role_name === 'BCH Khoa') {
-    $sql .= " AND (u.unit LIKE '" . $conn->real_escape_string($user_unit) . "%')";
-  }
+// Tìm kiếm theo tên người nộp
+if ($search_name !== "") {
+  $sql .= " AND u.fullName LIKE '%" . $conn->real_escape_string($search_name) . "%'";
+}
 
-  //BCH Chi đoàn → chỉ thấy đoàn viên cùng chi đoàn
+// Phân quyền hiển thị
+if (!$isAdmin && $role_name !== 'BCH Trường') {
+  if ($role_name === 'BCH Khoa') {
+    $sql .= " AND (ou.parent_id = '" . $conn->real_escape_string($user_unit) . "' OR ou.id = '" . $conn->real_escape_string($user_unit) . "')";
+  }
   if ($role_name === 'BCH Chi đoàn') {
-    $sql .= " AND u.unit = '" . $conn->real_escape_string($user_unit) . "'";
+    $sql .= " AND ou.id = '" . $conn->real_escape_string($user_unit) . "'";
   }
 }
 
@@ -95,8 +98,17 @@ $transactions = $conn->query($sql);
 ?>
 
 <div class="container">
-  <h2>🧾 Quản lý giao dịch đoàn phí</h2>
+  <h2>Quản lý giao dịch đoàn phí</h2>
   <?= $message ?>
+
+  <!-- Form tìm kiếm -->
+  <form method="GET" class="search-form">
+    <input type="text" name="search" placeholder="Tìm kiếm..." value="<?= htmlspecialchars($search_name) ?>">
+    <button type="submit" class="btn-search">Tìm kiếm</button>
+    <?php if ($search_name): ?>
+      <a href="manage_transactions.php" class="btn-reset">Đặt lại</a>
+    <?php endif; ?>
+  </form>
 
   <table class="table">
     <thead>
@@ -109,8 +121,7 @@ $transactions = $conn->query($sql);
         <th>Hình thức</th>
         <th>Ngày</th>
         <th>Trạng thái</th>
-        <th>Ghi chú</th>
-        <th>Thao tác</th>
+        <?php if ($isAdmin): ?><th>Thao tác</th><?php endif; ?>
       </tr>
     </thead>
     <tbody>
@@ -119,42 +130,32 @@ $transactions = $conn->query($sql);
           <tr>
             <td><?= htmlspecialchars($t['transaction_code']) ?></td>
             <td><?= htmlspecialchars($t['payer_name']) ?></td>
-            <td><?= htmlspecialchars($t['payer_unit'] ?? '-') ?></td>
+            <td><?= htmlspecialchars($t['payer_unit'] ?? 'Chưa cập nhật') ?></td>
             <td><?= htmlspecialchars($t['period_label']) ?></td>
             <td><?= number_format($t['amount'], 0, ',', '.') ?>đ</td>
             <td><?= htmlspecialchars($t['payment_method']) ?></td>
             <td><?= date("d/m/Y H:i", strtotime($t['payment_date'])) ?></td>
             <td><span class="status <?= strtolower($t['status']) ?>"><?= htmlspecialchars($t['status']) ?></span></td>
-            <td><?= htmlspecialchars($t['note'] ?? '') ?></td>
+
+            <?php if ($isAdmin): ?>
             <td>
               <form method="POST" class="inline-form">
                 <input type="hidden" name="payment_id" value="<?= $t['id'] ?>">
                 <select name="status" class="status-select">
                   <option value="Pending" <?= $t['status'] == 'Pending' ? 'selected' : '' ?>>Pending</option>
-                  <option value="Success">Success</option>
-                  <option value="Failed">Failed</option>
-                  <option value="Need review">Need review</option>
-                  <option value="Canceled">Canceled</option>
+                  <option value="Success" <?= $t['status'] == 'Success' ? 'selected' : '' ?>>Success</option>
+                  <option value="Failed" <?= $t['status'] == 'Failed' ? 'selected' : '' ?>>Failed</option>
+                  <option value="Need review" <?= $t['status'] == 'Need review' ? 'selected' : '' ?>>Need review</option>
+                  <option value="Canceled" <?= $t['status'] == 'Canceled' ? 'selected' : '' ?>>Canceled</option>
                 </select>
-                <input type="text" name="note" placeholder="Ghi chú..." value="<?= htmlspecialchars($t['note'] ?? '') ?>">
                 <button type="submit" class="btn-update">Lưu</button>
               </form>
-
-              <!-- Nút nhắc nợ -->
-              <?php if (in_array($t['status'], ['Pending', 'Need review'])): ?>
-                <form method="POST" class="inline-form" action="remind_member.php">
-                  <input type="hidden" name="payer_name" value="<?= htmlspecialchars($t['payer_name']) ?>">
-                  <input type="hidden" name="payer_unit" value="<?= htmlspecialchars($t['payer_unit']) ?>">
-                  <input type="hidden" name="amount" value="<?= $t['amount'] ?>">
-                  <input type="hidden" name="period_label" value="<?= htmlspecialchars($t['period_label']) ?>">
-                  <button type="submit" class="btn-remind">Nhắc nợ</button>
-                </form>
-              <?php endif; ?>
             </td>
+            <?php endif; ?>
           </tr>
         <?php endwhile; ?>
       <?php else: ?>
-        <tr><td colspan="10" style="text-align:center;">Không có giao dịch phù hợp.</td></tr>
+        <tr><td colspan="<?= $isAdmin ? 9 : 8 ?>" style="text-align:center;">Không có giao dịch phù hợp.</td></tr>
       <?php endif; ?>
     </tbody>
   </table>
@@ -164,13 +165,38 @@ $transactions = $conn->query($sql);
 .container {
   margin-left: 240px;
   padding: 20px;
-  max-width: calc(100% - 280px);
+  max-width: calc(100% - 300px);
 }
 h2 {
   text-align: center;
   margin-bottom: 20px;
   color: #2d3436;
 }
+.search-form {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+.search-form input {
+  width: 250px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.btn-search, .btn-reset {
+  background: #0984e3;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-reset { background: #636e72; }
+.btn-search:hover { background: #0772c3; }
+.btn-reset:hover { background: #555; }
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -187,12 +213,10 @@ tr:nth-child(even) { background: #f9f9f9; }
 
 .inline-form {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
   justify-content: center;
-  margin-top: 5px;
+  gap: 6px;
 }
-.status-select, input[type=text] {
+.status-select {
   padding: 5px;
   font-size: 13px;
   border: 1px solid #ccc;
@@ -208,22 +232,11 @@ tr:nth-child(even) { background: #f9f9f9; }
 }
 .btn-update:hover { background: #019875; }
 
-.btn-remind {
-  background: linear-gradient(135deg, #e67e22, #f39c12);
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.btn-remind:hover {
-  background: linear-gradient(135deg, #d35400, #e67e22);
-}
-
 .status.success { color: #27ae60; font-weight: bold; }
 .status.pending { color: #e67e22; font-weight: bold; }
 .status.failed { color: #e74c3c; font-weight: bold; }
 .status.needreview { color: #f1c40f; font-weight: bold; }
+
 .success { color: #27ae60; font-weight: bold; text-align: center; }
 .error { color: #d63031; font-weight: bold; text-align: center; }
 </style>

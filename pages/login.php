@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Đăng nhập</button>
       </form>
       <div class="forgot">
-        <a href="forgot_password.php">🔑 Quên mật khẩu?</a>
+        <a href="forgot_password.php">Quên mật khẩu?</a>
       </div>
     </div>
   </div>

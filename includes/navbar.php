@@ -29,6 +29,24 @@
         }
     }
     ?>
+    <?php
+    if (isset($_SESSION['user'])) {
+        $role = $_SESSION['user']['role_name'] ?? '';
+        if (in_array($role, ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'])
+        ) {
+            echo '<li><a href="fee_cashbook_summary.php">Quản lý sổ quỹ</a></li>';
+        }
+    }
+    ?>
+    <?php
+    if (isset($_SESSION['user'])) {
+        $role = $_SESSION['user']['role_name'] ?? '';
+        if (in_array($role, ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'])
+        ) {
+            echo '<li><a href="activity_management.php">Quản lý hoạt động</a></li>';
+        }
+    }
+    ?>
     <li><a href="profile.php">Thông tin tài khoản</a></li>
   </ul>
 </nav>

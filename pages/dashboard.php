@@ -23,12 +23,8 @@ $user_role = $user['role_name'] ?? '';
       <a href="pay_fee.php" class="btn-pay">Nộp đoàn phí</a>
     <?php endif; ?>
 
-    <?php if (in_array($user_role, ['BCH Chi đoàn', 'BCH Khoa'])): ?>
-      <a href="activity_proposal.php" class="btn-pay">Đề xuất hoạt động</a>
-    <?php endif; ?>
-
-    <?php if (in_array($user_role, ['BCH Trường', 'BCH Khoa'])): ?>
-      <a href="activity_approval.php" class="btn-pay">Phê duyệt hoạt động</a>
+    <?php if (in_array($user_role, ['BCH Trường', 'BCH Khoa', 'BCH Chi đoàn'])): ?>
+      <a href="report_summary.php" class="btn-pay">Thống kê báo cáo</a>
     <?php endif; ?>
 
     <?php if ($user['isAdmin']): ?>

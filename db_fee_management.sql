@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th10 20, 2025 lúc 07:35 PM
+-- Thời gian đã tạo: Th10 28, 2025 lúc 12:20 AM
 -- Phiên bản máy phục vụ: 10.4.11-MariaDB
 -- Phiên bản PHP: 7.4.4
 
@@ -41,8 +41,10 @@ CREATE TABLE `activity_approval_log` (
 --
 
 INSERT INTO `activity_approval_log` (`id`, `proposal_id`, `action`, `performed_by`, `performed_at`, `note`) VALUES
-(1, 1, 'Tạo đề xuất', 150, '2025-11-21 01:24:30', 'Đề xuất hoạt động mới được tạo'),
-(2, 1, 'Phê duyệt', 150, '2025-11-21 01:25:14', 'Đề xuất được phê duyệt với hạn mức 500.000đ');
+(5, 3, 'Tạo đề xuất', 146, '2025-11-27 21:41:27', 'Đề xuất hoạt động mới được tạo'),
+(6, 4, 'Tạo đề xuất', 146, '2025-11-27 21:42:13', 'Đề xuất hoạt động mới được tạo'),
+(7, 3, 'Phê duyệt', 146, '2025-11-27 21:57:07', 'Đề xuất được phê duyệt với hạn mức 100.000đ'),
+(8, 4, 'Phê duyệt', 146, '2025-11-27 22:00:33', 'Đề xuất được phê duyệt với hạn mức 50.000đ');
 
 -- --------------------------------------------------------
 
@@ -106,7 +108,30 @@ CREATE TABLE `activity_proposal` (
 --
 
 INSERT INTO `activity_proposal` (`id`, `title`, `content`, `estimated_budget`, `expected_date`, `proposer_id`, `unit_type`, `unit_id`, `status`, `approved_by`, `approved_at`, `rejection_reason`, `approved_budget`, `approval_comment`, `created_at`, `updated_at`) VALUES
-(1, 'test', 'sgdrh', '500000.00', '2025-11-02', 150, '0', 0, 'Đã phê duyệt', 150, '2025-11-21 01:25:14', NULL, '500000.00', '', '2025-11-21 01:24:30', '2025-11-21 01:25:14');
+(3, 'từ nguyện', 'ahihihihi', '100000.00', '2025-11-30', 146, '0', 0, 'Đã phê duyệt', 146, '2025-11-27 21:57:07', NULL, '100000.00', 'tốt', '2025-11-27 21:41:27', '2025-11-27 21:57:07'),
+(4, 'test22e', 'ưdwq', '40000.00', '2025-11-29', 146, '0', 0, 'Đã phê duyệt', 146, '2025-11-27 22:00:33', NULL, '50000.00', 'hjk', '2025-11-27 21:42:13', '2025-11-27 22:00:33');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `activity_settlement`
+--
+
+CREATE TABLE `activity_settlement` (
+  `id` int(11) NOT NULL,
+  `activity_id` int(11) NOT NULL COMMENT 'FK → activity_proposal.id',
+  `proposed_budget` decimal(12,2) DEFAULT 0.00 COMMENT 'Dự toán duyệt',
+  `actual_expense` decimal(12,2) DEFAULT 0.00 COMMENT 'Thực chi',
+  `difference` decimal(12,2) DEFAULT 0.00 COMMENT 'Chênh lệch (+/-)',
+  `explanation` text DEFAULT NULL COMMENT 'Giải trình nếu có',
+  `file_path` varchar(255) DEFAULT NULL COMMENT 'File báo cáo đính kèm',
+  `submitted_by` int(11) DEFAULT NULL COMMENT 'Người nộp quyết toán (FK → users.userId)',
+  `submitted_at` datetime DEFAULT current_timestamp(),
+  `status` varchar(50) DEFAULT 'Chờ duyệt' COMMENT 'Trạng thái: Chờ duyệt / Đã duyệt / Từ chối',
+  `approved_by` int(11) DEFAULT NULL,
+  `approved_at` datetime DEFAULT NULL,
+  `note` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Báo cáo quyết toán hoạt động Đoàn';
 
 -- --------------------------------------------------------
 
@@ -166,6 +191,16 @@ CREATE TABLE `fee_approval` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `fee_approval`
+--
+
+INSERT INTO `fee_approval` (`id`, `period_label`, `unit_type`, `unit_id`, `approved_by`, `approved_at`, `status`, `note`, `created_at`, `updated_at`) VALUES
+(7, 'test', 'BCH Chi đoàn', 13, 158, '2025-11-27 19:35:28', 'Đã khóa dữ liệu', 'đủ', '2025-11-27 19:35:28', '2025-11-27 19:36:06'),
+(8, 'test', 'BCH Khoa', 8, 146, '2025-11-27 19:36:06', 'Đã khóa dữ liệu', 'oke', '2025-11-27 19:36:06', '2025-11-27 19:36:31'),
+(9, 'test', 'BCH Trường', 1, 142, '2025-11-27 19:36:31', 'Đã khóa dữ liệu', 'chốt', '2025-11-27 19:36:31', '2025-11-27 19:36:31'),
+(10, 'test', 'BCH Trường', 1, 142, '2025-11-27 19:38:16', 'Đã khóa dữ liệu', 'chốt', '2025-11-27 19:38:16', '2025-11-27 19:38:16');
+
 -- --------------------------------------------------------
 
 --
@@ -185,6 +220,14 @@ CREATE TABLE `fee_approval_log` (
   `note` text COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `fee_approval_log`
+--
+
+INSERT INTO `fee_approval_log` (`id`, `period_label`, `from_unit_type`, `from_unit_id`, `to_unit_type`, `to_unit_id`, `sent_by`, `sent_at`, `status`, `note`) VALUES
+(5, 'test', 'BCH Chi đoàn', 13, '0', NULL, 158, '2025-11-27 19:35:28', 'Đã gửi', 'đủ'),
+(6, 'test', 'BCH Khoa', 8, '0', NULL, 146, '2025-11-27 19:36:06', 'Đã gửi', 'oke');
+
 -- --------------------------------------------------------
 
 --
@@ -202,6 +245,26 @@ CREATE TABLE `fee_cashbook` (
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Đang đổ dữ liệu cho bảng `fee_cashbook`
+--
+
+INSERT INTO `fee_cashbook` (`id`, `payment_id`, `transaction_type`, `transaction_date`, `amount`, `recorded_by`, `description`, `created_at`, `updated_at`) VALUES
+(15, 39, 'Thu', '2025-11-27 02:02:21', '29000.00', 158, 'BCH xác nhận thu tiền mặt', '2025-11-27 02:02:21', '2025-11-27 02:02:21'),
+(16, 39, 'Thu', '2025-11-27 09:10:49', '29000.00', 9, 'Duyệt giao dịch đoàn phí', '2025-11-27 09:10:49', '2025-11-27 09:10:49'),
+(17, 44, 'Thu', '2025-11-27 09:24:17', '29000.00', 190, 'BCH xác nhận thu tiền mặt', '2025-11-27 09:24:17', '2025-11-27 09:24:17'),
+(18, 43, 'Thu', '2025-11-27 09:24:22', '30000.00', 190, 'BCH xác nhận đoàn viên nộp tiền mặt', '2025-11-27 09:24:22', '2025-11-27 09:24:22'),
+(19, 48, 'Thu', '2025-11-27 18:44:49', '28000.00', 146, 'BCH xác nhận thu tiền mặt', '2025-11-27 18:44:49', '2025-11-27 18:44:49'),
+(20, 49, 'Thu', '2025-11-27 19:08:08', '29000.00', 159, 'BCH xác nhận thu tiền mặt', '2025-11-27 19:08:08', '2025-11-27 19:08:08'),
+(21, 50, 'Thu', '2025-11-27 19:08:19', '29000.00', 160, 'BCH xác nhận thu tiền mặt', '2025-11-27 19:08:19', '2025-11-27 19:08:19'),
+(22, 51, 'Thu', '2025-11-27 19:08:30', '29000.00', 161, 'BCH xác nhận thu tiền mặt', '2025-11-27 19:08:30', '2025-11-27 19:08:30'),
+(23, 55, 'Thu', '2025-11-27 19:09:32', '30000.00', 158, 'BCH xác nhận đoàn viên nộp tiền mặt', '2025-11-27 19:09:32', '2025-11-27 19:09:32'),
+(24, 54, 'Thu', '2025-11-27 19:09:34', '30000.00', 158, 'BCH xác nhận đoàn viên nộp tiền mặt', '2025-11-27 19:09:34', '2025-11-27 19:09:34'),
+(25, 53, 'Thu', '2025-11-27 19:09:36', '30000.00', 158, 'BCH xác nhận đoàn viên nộp tiền mặt', '2025-11-27 19:09:36', '2025-11-27 19:09:36'),
+(26, 52, 'Thu', '2025-11-27 19:09:37', '30000.00', 158, 'BCH xác nhận đoàn viên nộp tiền mặt', '2025-11-27 19:09:37', '2025-11-27 19:09:37'),
+(27, 37, 'Thu', '2025-11-27 19:09:39', '30000.00', 158, 'BCH xác nhận đoàn viên nộp tiền mặt', '2025-11-27 19:09:39', '2025-11-27 19:09:39'),
+(28, 57, 'Thu', '2025-11-27 21:18:30', '28000.00', 146, 'BCH xác nhận thu tiền mặt', '2025-11-27 21:18:30', '2025-11-27 21:18:30');
 
 -- --------------------------------------------------------
 
@@ -290,10 +353,10 @@ CREATE TABLE `fee_obligation` (
 --
 
 INSERT INTO `fee_obligation` (`id`, `user_id`, `policy_id`, `period_label`, `amount`, `due_date`, `status`, `reference_code`, `created_at`, `updated_at`) VALUES
-(1137, 158, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000018-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1138, 159, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000019-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1139, 160, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000020-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1140, 161, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000021-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
+(1137, 158, 28, 'test', '29000.00', '2025-11-17', 'Đã nộp', 'DV-100000018-test', '2025-11-05 16:13:10', '2025-11-27 02:02:21'),
+(1138, 159, 28, 'test', '29000.00', '2025-11-17', 'Đã nộp', 'DV-100000019-test', '2025-11-05 16:13:10', '2025-11-27 19:08:08'),
+(1139, 160, 28, 'test', '29000.00', '2025-11-17', 'Đã nộp', 'DV-100000020-test', '2025-11-05 16:13:10', '2025-11-27 19:08:19'),
+(1140, 161, 28, 'test', '29000.00', '2025-11-17', 'Đã nộp', 'DV-100000021-test', '2025-11-05 16:13:10', '2025-11-27 19:08:30'),
 (1141, 162, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000022-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1142, 163, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000023-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1143, 164, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000024-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
@@ -322,7 +385,7 @@ INSERT INTO `fee_obligation` (`id`, `user_id`, `policy_id`, `period_label`, `amo
 (1166, 187, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000047-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1167, 188, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000048-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1168, 189, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000049-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1169, 190, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000050-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
+(1169, 190, 28, 'test', '29000.00', '2025-11-17', 'Đã nộp', 'DV-100000050-test', '2025-11-05 16:13:10', '2025-11-27 09:24:17'),
 (1170, 191, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000051-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1171, 192, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000052-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1172, 193, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000053-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
@@ -334,7 +397,7 @@ INSERT INTO `fee_obligation` (`id`, `user_id`, `policy_id`, `period_label`, `amo
 (1178, 199, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000059-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1179, 200, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000060-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1180, 201, 28, 'test', '29000.00', '2025-11-17', 'Chưa nộp', 'DV-100000061-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1181, 146, 28, 'test', '28000.00', '2025-11-17', 'Chưa nộp', 'DV-100000006-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
+(1181, 146, 28, 'test', '28000.00', '2025-11-17', 'Đã nộp', 'DV-100000006-test', '2025-11-05 16:13:10', '2025-11-27 18:44:49'),
 (1182, 147, 28, 'test', '28000.00', '2025-11-17', 'Chưa nộp', 'DV-100000007-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1183, 148, 28, 'test', '28000.00', '2025-11-17', 'Chưa nộp', 'DV-100000008-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1184, 149, 28, 'test', '28000.00', '2025-11-17', 'Chưa nộp', 'DV-100000009-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
@@ -350,11 +413,11 @@ INSERT INTO `fee_obligation` (`id`, `user_id`, `policy_id`, `period_label`, `amo
 (1194, 143, 28, 'test', '25000.00', '2025-11-17', 'Chưa nộp', 'DV-100000003-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1195, 144, 28, 'test', '25000.00', '2025-11-17', 'Chưa nộp', 'DV-100000004-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1196, 145, 28, 'test', '25000.00', '2025-11-17', 'Chưa nộp', 'DV-100000005-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1197, 202, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000062-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1198, 203, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000063-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1199, 204, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000064-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1200, 205, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000065-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1201, 206, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000066-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
+(1197, 202, 28, 'test', '30000.00', '2025-11-17', 'Đã nộp', 'DV-100000062-test', '2025-11-05 16:13:10', '2025-11-27 19:09:39'),
+(1198, 203, 28, 'test', '30000.00', '2025-11-17', 'Đã nộp', 'DV-100000063-test', '2025-11-05 16:13:10', '2025-11-27 19:09:37'),
+(1199, 204, 28, 'test', '30000.00', '2025-11-17', 'Đã nộp', 'DV-100000064-test', '2025-11-05 16:13:10', '2025-11-27 19:09:36'),
+(1200, 205, 28, 'test', '30000.00', '2025-11-17', 'Đã nộp', 'DV-100000065-test', '2025-11-05 16:13:10', '2025-11-27 19:09:34'),
+(1201, 206, 28, 'test', '30000.00', '2025-11-17', 'Đã nộp', 'DV-100000066-test', '2025-11-05 16:13:10', '2025-11-27 19:09:32'),
 (1202, 207, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000067-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1203, 208, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000068-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1204, 209, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000069-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
@@ -392,7 +455,7 @@ INSERT INTO `fee_obligation` (`id`, `user_id`, `policy_id`, `period_label`, `amo
 (1236, 241, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000101-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1237, 242, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000102-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1238, 243, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000103-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
-(1239, 244, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000104-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
+(1239, 244, 28, 'test', '30000.00', '2025-11-17', 'Đã nộp', 'DV-100000104-test', '2025-11-05 16:13:10', '2025-11-27 09:24:22'),
 (1240, 245, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000105-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1241, 246, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000106-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
 (1242, 247, 28, 'test', '30000.00', '2025-11-17', 'Chưa nộp', 'DV-100000107-test', '2025-11-05 16:13:10', '2025-11-05 16:13:10'),
@@ -454,7 +517,7 @@ INSERT INTO `fee_obligation` (`id`, `user_id`, `policy_id`, `period_label`, `amo
 (1298, 199, 28, 'test2', '29000.00', '2025-12-17', 'Chưa nộp', 'DV-100000059-test2', '2025-11-21 00:59:55', '2025-11-21 00:59:55'),
 (1299, 200, 28, 'test2', '29000.00', '2025-12-17', 'Chưa nộp', 'DV-100000060-test2', '2025-11-21 00:59:55', '2025-11-21 00:59:55'),
 (1300, 201, 28, 'test2', '29000.00', '2025-12-17', 'Chưa nộp', 'DV-100000061-test2', '2025-11-21 00:59:55', '2025-11-21 00:59:55'),
-(1301, 146, 28, 'test2', '28000.00', '2025-12-17', 'Chưa nộp', 'DV-100000006-test2', '2025-11-21 00:59:55', '2025-11-21 00:59:55'),
+(1301, 146, 28, 'test2', '28000.00', '2025-12-17', 'Đã nộp', 'DV-100000006-test2', '2025-11-21 00:59:55', '2025-11-27 21:18:30'),
 (1302, 147, 28, 'test2', '28000.00', '2025-12-17', 'Chưa nộp', 'DV-100000007-test2', '2025-11-21 00:59:55', '2025-11-21 00:59:55'),
 (1303, 148, 28, 'test2', '28000.00', '2025-12-17', 'Chưa nộp', 'DV-100000008-test2', '2025-11-21 00:59:55', '2025-11-21 00:59:55'),
 (1304, 149, 28, 'test2', '28000.00', '2025-12-17', 'Chưa nộp', 'DV-100000009-test2', '2025-11-21 00:59:55', '2025-11-21 00:59:55'),
@@ -552,6 +615,33 @@ CREATE TABLE `fee_payment` (
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Đang đổ dữ liệu cho bảng `fee_payment`
+--
+
+INSERT INTO `fee_payment` (`id`, `obligation_id`, `payer_id`, `collector_id`, `payment_method`, `payment_date`, `amount`, `status`, `receipt_id`, `transaction_code`, `note`, `created_at`, `updated_at`) VALUES
+(37, 1197, 202, NULL, 'Cash', '2025-11-27 01:52:29', '30000.00', 'Success', NULL, 'TXN-69274C6DCBC88', NULL, '2025-11-27 01:52:29', '2025-11-27 19:09:39'),
+(38, 1317, 202, NULL, 'VNPAY', '2025-11-27 01:54:29', '30000.00', 'Pending', NULL, 'TXN-69274CE5559F0', NULL, '2025-11-27 01:54:29', '2025-11-27 01:54:29'),
+(39, 1137, 158, NULL, 'Cash', '2025-11-27 02:02:21', '29000.00', 'Success', NULL, 'TXN-69274EBD5B3B3', NULL, '2025-11-27 02:02:21', '2025-11-27 09:10:49'),
+(40, 1212, 217, NULL, 'VNPAY', '2025-11-27 08:46:23', '30000.00', 'Pending', NULL, 'TXN-6927AD6F3518B', NULL, '2025-11-27 08:46:23', '2025-11-27 08:46:23'),
+(41, 1332, 217, NULL, 'VNPAY', '2025-11-27 08:46:42', '30000.00', 'Pending', NULL, 'TXN-6927AD82B00F6', NULL, '2025-11-27 08:46:42', '2025-11-27 08:46:42'),
+(42, 1212, 217, NULL, 'Cash', '2025-11-27 09:01:53', '30000.00', 'Pending', NULL, 'TXN-6927B111860FB', NULL, '2025-11-27 09:01:53', '2025-11-27 09:01:53'),
+(43, 1239, 244, NULL, 'Cash', '2025-11-27 09:23:48', '30000.00', 'Success', NULL, 'TXN-6927B634CA4D6', NULL, '2025-11-27 09:23:48', '2025-11-27 09:24:22'),
+(44, 1169, 190, NULL, 'Cash', '2025-11-27 09:24:17', '29000.00', 'Success', NULL, 'TXN-6927B651CDC6A', NULL, '2025-11-27 09:24:17', '2025-11-27 09:24:17'),
+(45, 1289, 190, NULL, 'VNPAY', '2025-11-27 09:29:44', '29000.00', 'Pending', NULL, 'TXN-6927B798D8BFE', NULL, '2025-11-27 09:29:44', '2025-11-27 09:29:44'),
+(46, 1181, 146, NULL, 'VNPAY', '2025-11-27 18:00:03', '28000.00', 'Pending', NULL, 'TXN-69282F330594D', NULL, '2025-11-27 18:00:03', '2025-11-27 18:00:03'),
+(47, 1301, 146, NULL, 'VNPAY', '2025-11-27 18:14:07', '28000.00', 'Pending', NULL, 'TXN-6928327F096A9', NULL, '2025-11-27 18:14:07', '2025-11-27 18:14:07'),
+(48, 1181, 146, NULL, 'Cash', '2025-11-27 18:44:49', '28000.00', 'Success', NULL, 'TXN-692839B10312D', NULL, '2025-11-27 18:44:49', '2025-11-27 18:44:49'),
+(49, 1138, 159, NULL, 'Cash', '2025-11-27 19:08:08', '29000.00', 'Success', NULL, 'TXN-69283F286992B', NULL, '2025-11-27 19:08:08', '2025-11-27 19:08:08'),
+(50, 1139, 160, NULL, 'Cash', '2025-11-27 19:08:19', '29000.00', 'Success', NULL, 'TXN-69283F338DF18', NULL, '2025-11-27 19:08:19', '2025-11-27 19:08:19'),
+(51, 1140, 161, NULL, 'Cash', '2025-11-27 19:08:30', '29000.00', 'Success', NULL, 'TXN-69283F3E4C9A8', NULL, '2025-11-27 19:08:30', '2025-11-27 19:08:30'),
+(52, 1198, 203, NULL, 'Cash', '2025-11-27 19:08:51', '30000.00', 'Success', NULL, 'TXN-69283F5366880', NULL, '2025-11-27 19:08:51', '2025-11-27 19:09:37'),
+(53, 1199, 204, NULL, 'Cash', '2025-11-27 19:08:58', '30000.00', 'Success', NULL, 'TXN-69283F5AA77A6', NULL, '2025-11-27 19:08:58', '2025-11-27 19:09:36'),
+(54, 1200, 205, NULL, 'Cash', '2025-11-27 19:09:07', '30000.00', 'Success', NULL, 'TXN-69283F63059F1', NULL, '2025-11-27 19:09:07', '2025-11-27 19:09:34'),
+(55, 1201, 206, NULL, 'Cash', '2025-11-27 19:09:17', '30000.00', 'Success', NULL, 'TXN-69283F6D71B66', NULL, '2025-11-27 19:09:17', '2025-11-27 19:09:32'),
+(56, 1193, 142, NULL, 'VNPAY', '2025-11-27 19:49:47', '25000.00', 'Pending', NULL, 'TXN-692848EB033A2', NULL, '2025-11-27 19:49:47', '2025-11-27 19:49:47'),
+(57, 1301, 146, NULL, 'Cash', '2025-11-27 21:18:30', '28000.00', 'Success', NULL, 'TXN-69285DB66F192', NULL, '2025-11-27 21:18:30', '2025-11-27 21:18:30');
 
 -- --------------------------------------------------------
 
@@ -667,6 +757,47 @@ CREATE TABLE `fee_receipt` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Đang đổ dữ liệu cho bảng `fee_receipt`
+--
+
+INSERT INTO `fee_receipt` (`id`, `payment_id`, `receipt_code`, `issue_date`, `issued_by`, `amount`, `file_url`, `status`, `created_at`, `updated_at`) VALUES
+(15, 39, 'RC-39-2025', '2025-11-27 02:02:21', 158, '29000.00', NULL, 'Issued', '2025-11-27 02:02:21', '2025-11-27 02:02:21'),
+(17, 44, 'RC-44-2025', '2025-11-27 09:24:17', 190, '29000.00', NULL, 'Issued', '2025-11-27 09:24:17', '2025-11-27 09:24:17'),
+(18, 43, 'RC-43-2025', '2025-11-27 09:24:22', 190, '30000.00', NULL, 'Issued', '2025-11-27 09:24:22', '2025-11-27 09:24:22'),
+(19, 48, 'RC-48-2025', '2025-11-27 18:44:49', 146, '28000.00', NULL, 'Issued', '2025-11-27 18:44:49', '2025-11-27 18:44:49'),
+(20, 49, 'RC-49-2025', '2025-11-27 19:08:08', 159, '29000.00', NULL, 'Issued', '2025-11-27 19:08:08', '2025-11-27 19:08:08'),
+(21, 50, 'RC-50-2025', '2025-11-27 19:08:19', 160, '29000.00', NULL, 'Issued', '2025-11-27 19:08:19', '2025-11-27 19:08:19'),
+(22, 51, 'RC-51-2025', '2025-11-27 19:08:30', 161, '29000.00', NULL, 'Issued', '2025-11-27 19:08:30', '2025-11-27 19:08:30'),
+(23, 55, 'RC-55-2025', '2025-11-27 19:09:32', 158, '30000.00', NULL, 'Issued', '2025-11-27 19:09:32', '2025-11-27 19:09:32'),
+(24, 54, 'RC-54-2025', '2025-11-27 19:09:34', 158, '30000.00', NULL, 'Issued', '2025-11-27 19:09:34', '2025-11-27 19:09:34'),
+(25, 53, 'RC-53-2025', '2025-11-27 19:09:36', 158, '30000.00', NULL, 'Issued', '2025-11-27 19:09:36', '2025-11-27 19:09:36'),
+(26, 52, 'RC-52-2025', '2025-11-27 19:09:37', 158, '30000.00', NULL, 'Issued', '2025-11-27 19:09:37', '2025-11-27 19:09:37'),
+(27, 37, 'RC-37-2025', '2025-11-27 19:09:39', 158, '30000.00', NULL, 'Issued', '2025-11-27 19:09:39', '2025-11-27 19:09:39'),
+(28, 57, 'RC-57-2025', '2025-11-27 21:18:30', 146, '28000.00', NULL, 'Issued', '2025-11-27 21:18:30', '2025-11-27 21:18:30');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `fee_summary`
+--
+
+CREATE TABLE `fee_summary` (
+  `id` int(11) NOT NULL,
+  `period_label` varchar(50) NOT NULL COMMENT 'Kỳ thu phí (VD: Học kỳ II/2025)',
+  `unit_type` varchar(50) NOT NULL COMMENT 'Loại đơn vị (Chi đoàn / Khoa / Trường)',
+  `unit_id` int(11) NOT NULL COMMENT 'FK → organization_units.id',
+  `total_members` int(11) DEFAULT 0 COMMENT 'Tổng số đoàn viên',
+  `paid_members` int(11) DEFAULT 0 COMMENT 'Số đoàn viên đã nộp',
+  `unpaid_members` int(11) DEFAULT 0 COMMENT 'Số đoàn viên chưa nộp',
+  `exempt_members` int(11) DEFAULT 0 COMMENT 'Số đoàn viên được miễn nộp',
+  `total_collected` decimal(10,2) DEFAULT 0.00 COMMENT 'Tổng số tiền thu được',
+  `approval_status` varchar(50) DEFAULT 'Chờ duyệt' COMMENT 'Trạng thái duyệt dữ liệu (Chờ duyệt / Đã duyệt)',
+  `locked` tinyint(1) DEFAULT 0 COMMENT 'Cờ khóa dữ liệu kỳ (1 = Đã khóa)',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT 'Ngày tạo bản ghi',
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Ngày cập nhật bản ghi'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tổng hợp dữ liệu thu phí, trạng thái duyệt và khóa theo kỳ';
+
 -- --------------------------------------------------------
 
 --
@@ -695,7 +826,7 @@ INSERT INTO `organization_units` (`id`, `unit_name`, `unit_level`, `parent_id`, 
 (8, 'Khoa CNTT', 'Khoa', 1, NULL, NULL, '2025-11-01 05:10:05', '2025-11-01 05:17:15'),
 (9, 'Chi đoàn K72E4', 'ChiDoan', 8, NULL, NULL, '2025-11-01 05:11:36', '2025-11-01 09:09:46'),
 (12, 'Chi đoàn K72E2', 'ChiDoan', 8, NULL, NULL, '2025-11-01 05:16:20', '2025-11-01 09:09:29'),
-(13, 'Chi đoàn K72E1', 'ChiDoan', 8, NULL, NULL, '2025-11-01 05:16:27', '2025-11-01 09:09:35'),
+(13, 'Chi đoàn K72E1', 'ChiDoan', 8, NULL, NULL, '2025-11-01 05:16:27', '2025-11-27 02:37:30'),
 (15, 'Chi đoàn K72E3', 'ChiDoan', 8, NULL, NULL, '2025-11-01 09:08:07', '2025-11-01 09:09:40'),
 (16, 'Chi đoàn K72A2', 'ChiDoan', 2, NULL, NULL, '2025-11-01 09:09:59', '2025-11-01 09:09:59'),
 (17, 'Chi đoàn K72A3', 'ChiDoan', 2, NULL, NULL, '2025-11-01 09:10:04', '2025-11-01 09:10:04'),
@@ -1055,6 +1186,15 @@ ALTER TABLE `activity_proposal`
   ADD KEY `fk_approver` (`approved_by`);
 
 --
+-- Chỉ mục cho bảng `activity_settlement`
+--
+ALTER TABLE `activity_settlement`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_settlement_activity` (`activity_id`),
+  ADD KEY `fk_settlement_user` (`submitted_by`),
+  ADD KEY `fk_settlement_approved_user` (`approved_by`);
+
+--
 -- Chỉ mục cho bảng `fee_allocation_detail`
 --
 ALTER TABLE `fee_allocation_detail`
@@ -1164,6 +1304,13 @@ ALTER TABLE `fee_receipt`
   ADD KEY `fk_receipt_user` (`issued_by`);
 
 --
+-- Chỉ mục cho bảng `fee_summary`
+--
+ALTER TABLE `fee_summary`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_fee_summary_unit` (`unit_id`);
+
+--
 -- Chỉ mục cho bảng `organization_units`
 --
 ALTER TABLE `organization_units`
@@ -1203,7 +1350,7 @@ ALTER TABLE `user_role`
 -- AUTO_INCREMENT cho bảng `activity_approval_log`
 --
 ALTER TABLE `activity_approval_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT cho bảng `activity_budget`
@@ -1221,7 +1368,13 @@ ALTER TABLE `activity_fund_source`
 -- AUTO_INCREMENT cho bảng `activity_proposal`
 --
 ALTER TABLE `activity_proposal`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT cho bảng `activity_settlement`
+--
+ALTER TABLE `activity_settlement`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `fee_allocation_detail`
@@ -1239,19 +1392,19 @@ ALTER TABLE `fee_allocation_voucher`
 -- AUTO_INCREMENT cho bảng `fee_approval`
 --
 ALTER TABLE `fee_approval`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `fee_approval_log`
 --
 ALTER TABLE `fee_approval_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `fee_cashbook`
 --
 ALTER TABLE `fee_cashbook`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT cho bảng `fee_cashbook_unit`
@@ -1281,7 +1434,7 @@ ALTER TABLE `fee_obligation`
 -- AUTO_INCREMENT cho bảng `fee_payment`
 --
 ALTER TABLE `fee_payment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT cho bảng `fee_policy`
@@ -1305,7 +1458,13 @@ ALTER TABLE `fee_policy_rule`
 -- AUTO_INCREMENT cho bảng `fee_receipt`
 --
 ALTER TABLE `fee_receipt`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+
+--
+-- AUTO_INCREMENT cho bảng `fee_summary`
+--
+ALTER TABLE `fee_summary`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `organization_units`
@@ -1360,6 +1519,14 @@ ALTER TABLE `activity_fund_source`
 ALTER TABLE `activity_proposal`
   ADD CONSTRAINT `fk_approver` FOREIGN KEY (`approved_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_proposer` FOREIGN KEY (`proposer_id`) REFERENCES `users` (`userId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `activity_settlement`
+--
+ALTER TABLE `activity_settlement`
+  ADD CONSTRAINT `fk_settlement_activity` FOREIGN KEY (`activity_id`) REFERENCES `activity_proposal` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_settlement_approved_user` FOREIGN KEY (`approved_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_settlement_user` FOREIGN KEY (`submitted_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL;
 
 --
 -- Các ràng buộc cho bảng `fee_allocation_detail`
@@ -1452,6 +1619,12 @@ ALTER TABLE `fee_policy_rule`
 ALTER TABLE `fee_receipt`
   ADD CONSTRAINT `fk_receipt_payment` FOREIGN KEY (`payment_id`) REFERENCES `fee_payment` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_receipt_user` FOREIGN KEY (`issued_by`) REFERENCES `users` (`userId`) ON DELETE SET NULL;
+
+--
+-- Các ràng buộc cho bảng `fee_summary`
+--
+ALTER TABLE `fee_summary`
+  ADD CONSTRAINT `fk_fee_summary_unit` FOREIGN KEY (`unit_id`) REFERENCES `organization_units` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `organization_units`
